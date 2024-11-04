@@ -42,18 +42,18 @@ let get_cell maze x y =
     else
       invalid_arg "get_cell: coordinates out of bounds"
 
-  (* this sets the cell at position (x, y) to [cell] *)
+  (* Sets the cell at position (x, y) to [cell] *)
   let set_cell maze x y cell =
     if x >= 0 && x < maze.width && y >= 0 && y < maze.height then
       maze.grid.(x).(y) <- cell
     else
       invalid_arg "set_cell: coordinates out of bounds"
 
-  (* checks if (x, y) is within the maze bounds *)
+  (* Checks if (x, y) is within the maze bounds *)
   let in_bounds maze x y =
     x >= 0 && x < maze.width && y >= 0 && y < maze.height
 
-  (* returns a list of neighboring coordinates *)
+  (* Returns a list of neighboring coordinates *)
   let get_neighbors maze x y =
     let directions = [ (0, -1); (0, 1); (-1, 0); (1, 0) ] in
     List.filter (fun (dx, dy) ->
