@@ -1,0 +1,7 @@
+1. cd demo/Dream
+
+2. dune exec --root . ./hello.exe
+
+3. go to http://localhost:8080
+
+4. "Good morning, world!" should be on the page
