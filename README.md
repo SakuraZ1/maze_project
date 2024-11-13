@@ -10,7 +10,7 @@ Key Features:
         - Kruskal's Algorithm
 
 Maze Solve:
-   - Implement multiple maze solver algorithms
+     - Implement multiple maze solver algorithms
          - BFS 
          - A-star search
 
