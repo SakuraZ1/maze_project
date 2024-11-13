@@ -15,8 +15,8 @@ Key Features:
 
 - Maze Solve:
      - Implement multiple maze solver algorithms
-           - BFS 
-           - A-star search
+          - BFS 
+          - A-star search
 
 ## Mock
 The Maze Game will have a GUI for users:
