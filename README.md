@@ -9,7 +9,7 @@ Key Features:
         - Prim's Algorithm
         - Kruskal's Algorithm
 
-Maze Solve:
+  - Maze Solve:
      - Implement multiple maze solver algorithms
          - BFS 
          - A-star search
