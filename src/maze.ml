@@ -8,53 +8,54 @@ type direction = North | South | East | West
 type cell = {
   x : int;  
   y : int;  
-  mutable walls : (direction * bool) list; 
+  walls : (direction * bool) list;  
 }
 
 (* Define the maze type, representing the entire maze. *)
 type maze = {
-  width : int; 
-  height : int; 
+  width : int;  
+  height : int;  
   grid : cell array array; 
 }
 
-(* initializes a new maze with the given dimensions and walls on all sides. *)
+(** [create width height] initializes a new maze with the given dimensions and walls on all sides. *)
 let create width height =
-  let grid = Array.make_matrix width height {
-    x = 0;
-    y = 0;
-    walls = [];
-  } in
-  for x = 0 to width - 1 do
-    for y = 0 to height - 1 do
-      grid.(x).(y) <- {
-        x = x;
-        y = y;
-        walls = [ (North, true); (South, true); (East, true); (West, true) ];
-      }
-    done
-  done;
+  let grid =
+    Array.init width (fun x ->
+      Array.init height (fun y ->
+        {
+          x = x;
+          y = y;
+          walls = [ (North, true); (South, true); (East, true); (West, true) ];
+        }
+      )
+    )
+  in
   { width; height; grid }
 
-(* retrieves the cell at position (x, y) in [maze]. *)
+(** [get_cell maze x y] retrieves the cell at position (x, y) in [maze]. *)
 let get_cell maze x y =
   if x >= 0 && x < maze.width && y >= 0 && y < maze.height then
     maze.grid.(x).(y)
   else
     invalid_arg "get_cell: coordinates out of bounds"
 
-(* updates the cell at the cell's coordinates in [maze] with the provided [cell]. *)
+(** [set_cell maze cell] returns a new maze with [cell] updated in the grid. *)
 let set_cell maze cell =
   if cell.x >= 0 && cell.x < maze.width && cell.y >= 0 && cell.y < maze.height then
-    maze.grid.(cell.x).(cell.y) <- cell
+    let new_row = Array.copy maze.grid.(cell.x) in
+    new_row.(cell.y) <- cell;
+    let new_grid = Array.copy maze.grid in
+    new_grid.(cell.x) <- new_row;
+    { maze with grid = new_grid }
   else
     invalid_arg "set_cell: cell coordinates out of bounds"
 
-(*checks if (x, y) is within the bounds of [maze]. *)
+(** [in_bounds maze x y] checks if (x, y) is within the bounds of [maze]. *)
 let in_bounds maze x y =
   x >= 0 && x < maze.width && y >= 0 && y < maze.height
 
-(* returns a list of neighboring cells adjacent to [cell]. *)
+(** [get_neighbors maze cell] returns a list of neighboring cells adjacent to [cell]. *)
 let get_neighbors maze cell =
   let directions = [
     (North, (cell.x, cell.y - 1));
@@ -69,7 +70,7 @@ let get_neighbors maze cell =
       acc
   ) [] directions
 
-(* removes the wall between [cell1] and [cell2] in [maze]. *)
+(** [remove_wall maze cell1 cell2] returns a new maze with the wall between [cell1] and [cell2] removed. *)
 let remove_wall maze cell1 cell2 =
   let dx = cell2.x - cell1.x in
   let dy = cell2.y - cell1.y in
@@ -81,17 +82,22 @@ let remove_wall maze cell1 cell2 =
     else
       invalid_arg "remove_wall: cells are not adjacent"
   in
-  (* Remove wall from cell1 to cell2 *)
-  cell1.walls <- List.map (fun (dir, exists) ->
+  (* Update walls in cell1 *)
+  let new_walls1 = List.map (fun (dir, exists) ->
     if dir = dir_to_neighbor then (dir, false) else (dir, exists)
-  ) cell1.walls;
-  (* Remove wall from cell2 to cell1 *)
-  cell2.walls <- List.map (fun (dir, exists) ->
+  ) cell1.walls in
+  let cell1' = { cell1 with walls = new_walls1 } in
+  (* Update walls in cell2 *)
+  let new_walls2 = List.map (fun (dir, exists) ->
     if dir = dir_to_cell then (dir, false) else (dir, exists)
-  ) cell2.walls
+  ) cell2.walls in
+  let cell2' = { cell2 with walls = new_walls2 } in
+  (* Update the maze with the new cells *)
+  let maze = set_cell maze cell1' in
+  let maze = set_cell maze cell2' in
+  maze
 
-
-(* returns a list of neighboring cells that are accessible from [cell] (i.e., no wall between them). *)
+(** [get_passable_neighbors maze cell] returns a list of neighboring cells that are accessible from [cell] (i.e., no wall between them). *)
 let get_passable_neighbors maze cell =
   List.fold_left (fun acc (dir, exists) ->
     if not exists then
@@ -109,47 +115,57 @@ let get_passable_neighbors maze cell =
       acc
   ) [] cell.walls
 
-(* prints the maze to the console in ASCII art. *)
+(** [display maze] prints the maze to the console in ASCII art without using for loops. *)
 let display maze =
-  let horizontal_wall x y =
-    let cell = maze.grid.(x).(y) in
-    if List.assoc North cell.walls then "+---" else "+   "
+  let horizontal_walls =
+    Array.init maze.height (fun y ->
+      Array.init maze.width (fun x ->
+        let cell = maze.grid.(x).(y) in
+        if List.assoc North cell.walls then "+---" else "+   "
+      )
+    )
   in
-  let vertical_wall x y =
-    let cell = maze.grid.(x).(y) in
-    if List.assoc West cell.walls then "|   " else "    "
+  let vertical_walls =
+    Array.init maze.height (fun y ->
+      Array.init maze.width (fun x ->
+        let cell = maze.grid.(x).(y) in
+        if List.assoc West cell.walls then "|   " else "    "
+      )
+    )
   in
   (* Print the top boundary *)
-  for x = 0 to maze.width - 1 do
-    print_string "+---"
-  done;
-  print_string "+\n";
-  for y = 0 to maze.height - 1 do
-    (* Print vertical walls and cells *)
-    for x = 0 to maze.width - 1 do
-      print_string (vertical_wall x y)
-    done;
-    print_string "|\n";
-    (* Print horizontal walls *)
-    for x = 0 to maze.width - 1 do
-      print_string (horizontal_wall x y)
-    done;
-    print_string "+\n"
-  done
+  let top_boundary =
+    Array.fold_left (fun acc _ -> acc ^ "+---") "" (Array.make maze.width ()) ^ "+\n"
+  in
+  let maze_string =
+    Array.fold_left (fun acc y ->
+      let horizontal_line =
+        Array.fold_left (fun acc x -> acc ^ horizontal_walls.(y).(x)) "" (Array.init maze.width (fun x -> x)) ^ "+\n"
+      in
+      let vertical_line =
+        Array.fold_left (fun acc x -> acc ^ vertical_walls.(y).(x)) "" (Array.init maze.width (fun x -> x)) ^ "|\n"
+      in
+      acc ^ vertical_line ^ horizontal_line
+    ) top_boundary (Array.init maze.height (fun y -> y))
+  in
+  print_string maze_string
 
-(* initializes all cells in [maze] with walls on all sides. *)
+(** [initialize_cells maze] returns a new maze with all cells reinitialized with walls on all sides. *)
 let initialize_cells maze =
-  for x = 0 to maze.width - 1 do
-    for y = 0 to maze.height - 1 do
-      maze.grid.(x).(y) <- {
-        x = x;
-        y = y;
-        walls = [ (North, true); (South, true); (East, true); (West, true) ];
-      }
-    done
-  done
+  let new_grid =
+    Array.init maze.width (fun x ->
+      Array.init maze.height (fun y ->
+        {
+          x = x;
+          y = y;
+          walls = [ (North, true); (South, true); (East, true); (West, true) ];
+        }
+      )
+    )
+  in
+  { maze with grid = new_grid }
 
-(* the module that provides the MAZE interface. *)
+(** The module that provides the MAZE interface. *)
 module Maze : MAZE = struct
   type direction = direction
   type cell = cell

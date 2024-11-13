@@ -1,101 +1,33 @@
 
-(* [shuffle lst] returns a new list with the elements of [lst] randomly shuffled. *)
-let shuffle lst =
-  let arr = Array.of_list lst in
-  for i = Array.length arr - 1 downto 1 do
-    let j = Random.int (i + 1) in
-    let temp = arr.(i) in
-    arr.(i) <- arr.(j);
-    arr.(j) <- temp
-  done;
-  Array.to_list arr
+(* Shuffles a list randomly using an auxiliary list of random integers for sorting *)
+let shuffle list =
+  list |> List.map (fun x -> (Random.bits (), x)) |> List.sort compare |> List.map snd
 
+(* Returns a copy of a matrix with a specific element set at position (x, y) *)
+let set_matrix matrix x y value =
+  let updated_row = Array.copy matrix.(y) in
+  updated_row.(x) <- value;
+  let updated_matrix = Array.copy matrix in
+  updated_matrix.(y) <- updated_row;
+  updated_matrix
 
+(* Retrieves an element from a matrix at (x, y) *)
+let get_matrix matrix x y = matrix.(y).(x)
 
-(* [list_remove lst idx] removes the element at index [idx] from [lst]. *)
-let list_remove lst idx =
-  if idx < 0 || idx >= List.length lst then
-    invalid_arg "list_remove: index out of bounds"
-  else
-    let rec aux i acc = function
-      | [] -> List.rev acc
-      | h :: t ->
-        if i = idx then List.rev_append acc t
-        else aux (i + 1) (h :: acc) t
-    in
-    aux 0 [] lst
-
-
-
-(* Priority Queue Module *)
-module PriorityQueue = struct
-  type 'a item = {
-    value : 'a;
-    priority : int;
-  }
-
-  type 'a t = 'a item list
-
-  let empty = []
-
-  let insert pq item priority =
-    let rec aux acc = function
-      | [] -> List.rev ({ value = item; priority } :: acc)
-      | h :: t as l ->
-        if priority <= h.priority then
-          List.rev_append acc ({ value = item; priority } :: l)
-        else
-          aux (h :: acc) t
-    in
-    aux [] pq
-
-  let extract_min pq =
-    match pq with
-    | [] -> None
-    | { value; _ } :: t -> Some (value, t)
-
-  let is_empty pq = (pq = [])
-end
-
-
-
-(* Union-Find Data Structure *)
-module UnionFind = struct
-  type 'a node = {
-    value : 'a;
-    mutable parent : 'a node;
-    mutable rank : int;
-  }
-
-  type 'a t = ('a, 'a node) Hashtbl.t
-
-  let create () = Hashtbl.create 100
-
-  let make_set uf x =
-    let rec node = { value = x; parent = node; rank = 0 } in
-    Hashtbl.add uf x node
-
-  let rec find_node node =
-    if node != node.parent then
-      node.parent <- find_node node.parent;
-    node.parent
-
-  let find uf x =
-    let node = Hashtbl.find uf x in
-    (find_node node).value
-
-  let union uf x y =
-    let x_root = Hashtbl.find uf (find uf x) in
-    let y_root = Hashtbl.find uf (find uf y) in
-    if x_root == y_root then
-      ()
-    else if x_root.rank < y_root.rank then
-      x_root.parent <- y_root
-    else if x_root.rank > y_root.rank then
-      y_root.parent <- x_root
+(* Adds neighboring cells to the frontier list in Prim's algorithm *)
+let add_neighbors_to_frontier maze visited x y frontier =
+  let cell = Maze.get_cell maze x y in
+  let neighbors = Maze.get_neighbors maze cell in
+  List.fold_left (fun acc (_, neighbor) ->
+    if not (get_matrix visited neighbor.x neighbor.y) then
+      (x, y, neighbor.x, neighbor.y) :: acc
     else
-      begin
-        y_root.parent <- x_root;
-        x_root.rank <- x_root.rank + 1
-      end
-end
+      acc
+  ) frontier neighbors
+
+(* Removes the nth element from a list, returning the removed element and the updated list *)
+let split_nth lst n =
+  let rec aux i acc = function
+    | [] -> raise Not_found
+    | h :: t -> if i = n then (h, List.rev acc @ t) else aux (i + 1) (h :: acc) t
+  in aux 0 [] lst
