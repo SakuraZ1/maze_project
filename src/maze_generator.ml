@@ -1,4 +1,3 @@
-
 open Maze
 open Utils
 
@@ -123,3 +122,4 @@ module KruskalGenerator : MAZE_GENERATOR = struct
     edges := Utils.shuffle !edges;
     process_edges !edges
 end
+
