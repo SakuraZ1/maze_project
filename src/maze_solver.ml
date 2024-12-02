@@ -104,4 +104,3 @@ end
 module MakeSolver (M : MAZE_SOLVER) : MAZE_SOLVER = struct
   let solve = M.solve
 end
-
