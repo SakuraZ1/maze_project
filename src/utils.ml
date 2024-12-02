@@ -31,3 +31,42 @@ let split_nth lst n =
     | [] -> raise Not_found
     | h :: t -> if i = n then (h, List.rev acc @ t) else aux (i + 1) (h :: acc) t
   in aux 0 [] lst
+
+
+(* Overlay the solution path onto the maze *)
+let overlay_solution maze solution =
+  let grid_with_path =
+    Array.map (fun row ->
+      Array.map (fun cell ->
+        if List.exists (fun (x, y) -> cell.x = x && cell.y = y) solution then
+          { cell with walls = List.map (fun (dir, _) -> (dir, false)) cell.walls }
+        else
+          cell
+      ) row
+    ) maze.grid
+  in
+  { maze with grid = grid_with_path }
+
+
+  (* Converts the maze to HTML for display *)
+let maze_to_html maze solution =
+  let solution_set = List.fold_left (fun acc (x, y) -> (x, y) :: acc) [] solution in
+  let cell_to_html cell =
+    let is_in_solution = List.mem (cell.x, cell.y) solution_set in
+    let cell_class =
+      if is_in_solution then "cell path"
+      else "cell empty"
+    in
+    (* Create walls based on the cell's walls *)
+    let walls = cell.walls in
+    let top_wall = if List.assoc North walls then "border-top: 2px solid black;" else "" in
+    let right_wall = if List.assoc East walls then "border-right: 2px solid black;" else "" in
+    let bottom_wall = if List.assoc South walls then "border-bottom: 2px solid black;" else "" in
+    let left_wall = if List.assoc West walls then "border-left: 2px solid black;" else "" in
+    let style = top_wall ^ right_wall ^ bottom_wall ^ left_wall in
+    Printf.sprintf "<div class='%s' style='%s'></div>" cell_class style
+  in
+  let rows = Array.map (fun row ->
+    Array.fold_left (fun acc cell -> acc ^ (cell_to_html cell)) "" row
+  ) maze.grid in
+  Array.fold_left (fun acc row_html -> acc ^ "<div class='maze-row'>" ^ row_html ^ "</div>") "" rows
