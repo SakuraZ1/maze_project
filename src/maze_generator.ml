@@ -1,5 +1,6 @@
 open Maze
 open Utils
+open Core
 
 module type MAZE_GENERATOR = sig
   val generate : Maze.maze -> unit

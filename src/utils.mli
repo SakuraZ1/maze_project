@@ -1,4 +1,4 @@
-
+open Maze
 (* Utility functions for handling matrices and lists in an immutable way *)
 
 (* Shuffles a list in random order *)

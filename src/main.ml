@@ -1,7 +1,8 @@
 open Maze
 open Utils
-open Generator
-open Solver
+open Maze_generator
+open Maze_solver
+open Core
 
 (* Parse command-line arguments for maze dimensions and algorithms *)
 let parse_args () =

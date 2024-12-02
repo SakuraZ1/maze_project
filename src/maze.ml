@@ -1,3 +1,4 @@
+open Core
 
 (* Define the direction type representing the four cardinal directions. *)
 type direction = North | South | East | West

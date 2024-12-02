@@ -1,3 +1,5 @@
+open Core
+open Maze
 
 (* Shuffles a list randomly using an auxiliary list of random integers for sorting *)
 let shuffle list =

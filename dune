@@ -1,1 +1,12 @@
-
+(rule
+  (target maze_project.zip)
+  (deps 
+    src/main.ml
+    src/maze_generator.ml
+    src/maze_solver.ml
+    src/server.ml
+    src/utils.ml
+    src/maze.ml
+  )
+  (action
+    (run zip -R maze_project.zip %{deps})))
