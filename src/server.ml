@@ -1,5 +1,4 @@
 open Dream
-
 open Maze
 
 let maze_to_html maze =
