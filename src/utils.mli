@@ -16,3 +16,7 @@ val add_neighbors_to_frontier :
 
 (* Removes the nth element from a list, returning the removed element and the updated list *)
 val split_nth : 'a list -> int -> 'a * 'a list
+
+(** [overlay_solution maze solution] returns a new maze with the solution path [solution] overlaid
+    onto it, for visualization purposes. *)
+val overlay_solution : Maze.maze -> (int * int) list -> Maze.maze
