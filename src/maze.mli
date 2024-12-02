@@ -49,3 +49,5 @@ module type MAZE = sig
      useful in maze-solving algorithms. *)
   val get_passable_neighbors : maze -> cell -> cell list
 end
+
+
