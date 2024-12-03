@@ -1,3 +1,4 @@
+
 module type MAZE = sig
   (* Directions a cell may have walls in. *)
   type direction = North | South | East | West
@@ -23,9 +24,6 @@ module type MAZE = sig
   (* Creates a maze with given width and height, initializing cells with walls. *)
   val create : int -> int -> maze
 
-  (* Initializes cells in the maze, preparing them for use in generation or solving. *)
-  val initialize_cells : maze -> maze
-
   (* Displays the maze structure, showing walls and paths. Useful for debugging or visual output. *)
   val display : maze -> unit
 
@@ -48,6 +46,9 @@ module type MAZE = sig
   (* Retrieves neighboring cells that are accessible (i.e., without walls blocking them),
      useful in maze-solving algorithms. *)
   val get_passable_neighbors : maze -> cell -> cell list
+
+ (* Initializes cells in the maze, preparing them for use in generation or solving. *)
+  val initialize_cells : maze -> maze
 end
 
 

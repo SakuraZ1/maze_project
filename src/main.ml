@@ -5,19 +5,53 @@ open Maze_solver
 open Core
 
 (* Parse command-line arguments for maze dimensions and algorithms *)
+type options = {
+  width : int;
+  height : int;
+  generator : string;
+  solver : string;
+}
+
+let default_options = {
+  width = 10;
+  height = 10;
+  generator = "recursive";
+  solver = "bfs";
+}
+
+let rec parse_args_rec args options =
+  match args with
+  | [] -> options
+  | "-w" :: value :: rest ->
+      (try
+         let width = int_of_string value in
+         let options = { options with width } in
+         parse_args_rec rest options
+       with Failure _ ->
+         failwith "Invalid width value")
+  | "-h" :: value :: rest ->
+      (try
+         let height = int_of_string value in
+         let options = { options with height } in
+         parse_args_rec rest options
+       with Failure _ ->
+         failwith "Invalid height value")
+  | "-g" :: value :: rest ->
+      let options = { options with generator = value } in
+      parse_args_rec rest options
+  | "-s" :: value :: rest ->
+      let options = { options with solver = value } in
+      parse_args_rec rest options
+  | flag :: [] ->
+      failwith ("Missing value for flag: " ^ flag)
+  | unknown :: _ ->
+      failwith ("Unknown argument: " ^ unknown)
+
 let parse_args () =
-  let width = ref 10 in
-  let height = ref 10 in
-  let generator = ref "recursive" in
-  let solver = ref "bfs" in
-  let specs = [
-    ("-w", Arg.Set_int width, "Width of the maze (default: 10)");
-    ("-h", Arg.Set_int height, "Height of the maze (default: 10)");
-    ("-g", Arg.Set_string generator, "Maze generator: recursive, prim, or kruskal (default: recursive)");
-    ("-s", Arg.Set_string solver, "Maze solver: bfs or astar (default: bfs)")
-  ] in
-  Arg.parse specs (fun _ -> ()) "Maze generator and solver";
-  (!width, !height, !generator, !solver)
+  let args = Array.to_list Sys.argv |> List.tl in
+  parse_args_rec args default_options
+
+
 
 (* Select the appropriate generator module *)
 let select_generator generator_name =

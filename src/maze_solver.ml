@@ -2,6 +2,11 @@ open Core
 open Maze
 open Utils
 
+module type MAZE_SOLVER = sig
+  (* Solves the maze and returns a list of (x, y) positions representing the path. *)
+  val solve : Maze.maze -> (int * int) list
+end
+
 (* BFS Maze Solver *)
 module BFSSolver : MAZE_SOLVER = struct
   let solve maze =
