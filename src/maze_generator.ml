@@ -74,9 +74,13 @@ module PrimGenerator : MAZE_GENERATOR = struct
         frontier := updated_frontier;
         let visited1 = visited.(x1).(y1) in
         let visited2 = visited.(x2).(y2) in
-        if visited1 <> visited2 then
+        if Bool.(visited1 <> visited2) then
           begin
-            Maze.remove_wall maze x1 y1 x2 y2;
+            (*Maze.remove_wall maze x1 y1 x2 y2;*)
+            let cell1 = Maze.get_cell maze x1 y1 in
+            let cell2 = Maze.get_cell maze x2 y2 in
+            Maze.remove_wall maze cell1 cell2;
+
             if not visited.(x2).(y2) then add_frontier x2 y2
           end;
         process_frontier ()
@@ -94,17 +98,17 @@ module KruskalGenerator : MAZE_GENERATOR = struct
   type cell = Maze.cell
 
 
-  let generate maze =
+  let generate (maze: Maze.maze) =
     let width = maze.width in
     let height = maze.height in
-    let sets = UnionFind.create () in
+    let sets = Union_Find.create () in
     let edges = ref [] in
 
     let rec initialize_cells x y =
       if x < width then
         if y < height then
           let cell = Maze.get_cell maze x y in
-          UnionFind.make_set sets cell;
+          Union_Find.create sets cell;
           initialize_cells x (y + 1)
         else
           initialize_cells (x + 1) 0
