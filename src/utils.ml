@@ -55,8 +55,12 @@ let overlay_solution maze solution =
   (* Converts the maze to HTML for display *)
 let maze_to_html maze solution =
   let solution_set = List.fold solution ~init:[] ~f:(fun acc (x, y) -> (x, y) :: acc) in
-  let cell_to_html cell =
-    let is_in_solution = List.mem solution_set (cell.x, cell.y) in
+  let cell_to_html (cell: Maze.cell) =
+    let is_in_solution =let is_in_solution =
+      List.mem solution_set (cell.x, cell.y) ~equal:(fun (x1, y1) (x2, y2) ->
+        x1 = x2 && y1 = y2
+      )
+     in
     let cell_class =
       if is_in_solution then "cell path"
       else "cell empty"
