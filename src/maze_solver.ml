@@ -3,54 +3,68 @@ open Maze
 open Utils
 
 module type MAZE_SOLVER = sig
+
+  type cell = Maze.cell
+  type maze = Maze.maze 
+
   (* Solves the maze and returns a list of (x, y) positions representing the path. *)
   val solve : Maze.maze -> (int * int) list
 end
 
 (* BFS Maze Solver *)
 module BFSSolver : MAZE_SOLVER = struct
-  let solve maze =
-    let width, height = maze.width, maze.height in
-    let visited = Array.make_matrix width height false in
-    let prev = Array.make_matrix width height None in
+  type cell = Maze.cell
+  type maze = Maze.maze 
 
-    let rec bfs queue =
-      match queue with
-      | [] -> []
-      | (x, y) :: rest ->
-        if x = width - 1 && y = height - 1 then
-          (* Goal reached, reconstruct the path *)
-          let rec reconstruct_path x y acc =
-            match prev.(x).(y) with
-            | None -> (x, y) :: acc
-            | Some (px, py) -> reconstruct_path px py ((x, y) :: acc)
-          in
-          reconstruct_path (width - 1) (height - 1) []
-        else if visited.(x).(y) then
-          bfs rest
-        else
-          let cell = Maze.get_cell maze x y in
-          visited.(x).(y) <- true;
-          let neighbors = Maze.get_passable_neighbors maze cell in
-          let next_queue =
-            List.fold_left
-              (fun acc neighbor ->
+  let solve maze =
+      let width = Maze.get_width maze in
+      let height = Maze.get_height maze in
+
+      let visited = Array.make_matrix ~dimx:width ~dimy:height false in
+      let prev = Array.make_matrix ~dimx:width ~dimy:height None in
+
+      let rec bfs queue =
+        match queue with
+        | [] -> []
+        | (x, y) :: rest ->
+          if x = width - 1 && y = height - 1 then
+            (* Goal reached, reconstruct the path *)
+            let rec reconstruct_path x y acc =
+              match prev.(x).(y) with
+              | None -> (x, y) :: acc
+              | Some (px, py) -> reconstruct_path px py ((x, y) :: acc)
+            in
+            reconstruct_path x y []
+          else if visited.(x).(y) then
+            bfs rest
+          else begin
+            let cell = Maze.get_cell maze x y in
+            visited.(x).(y) <- true;
+            let neighbors = Maze.get_passable_neighbors maze cell in
+            let next_queue =
+              List.fold neighbors ~init:rest ~f:(fun acc neighbor ->
                 let nx, ny = neighbor.x, neighbor.y in
-                if not visited.(nx).(ny) then (
+                if not visited.(nx).(ny) then begin
                   prev.(nx).(ny) <- Some (x, y);
                   (nx, ny) :: acc
-                ) else acc)
-              rest neighbors
-          in
-          bfs next_queue
-    in
-    bfs [(0, 0)]
-end
+                end else acc
+              )
+            in
+            bfs next_queue
+          end
+      in
+      bfs [(0, 0)]
+  end
 
 (* A* Search Algorithm Maze Solver *)
 module AStarSolver : MAZE_SOLVER = struct
+  type cell = Maze.cell
+  type maze = Maze.maze 
+
   let solve maze =
-    let width, height = maze.width, maze.height in
+    let width = Maze.get_width maze in
+    let height = Maze.get_height maze in
+
     let open_set = PriorityQueue.empty in
     let came_from = Hashtbl.create (width * height) in
     let g_score = Hashtbl.create (width * height) in

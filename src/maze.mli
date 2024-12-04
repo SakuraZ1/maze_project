@@ -21,6 +21,12 @@ module type MAZE = sig
     grid : cell array array;
   }
 
+   
+  val get_width : maze -> int
+  val get_height : maze -> int
+  val get_grid : maze -> cell array array
+  val with_grid : maze -> cell array array -> maze
+
   (* Creates a maze with given width and height, initializing cells with walls. *)
   val create : int -> int -> maze
 
@@ -52,3 +58,5 @@ module type MAZE = sig
 end
 
 
+(* Expose the Maze module *)
+module Maze : MAZE

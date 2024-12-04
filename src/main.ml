@@ -1,5 +1,4 @@
 open Maze
-open Utils
 open Maze_generator
 open Maze_solver
 open Core
@@ -48,7 +47,7 @@ let rec parse_args_rec args options =
       failwith ("Unknown argument: " ^ unknown)
 
 let parse_args () =
-  let args = Array.to_list Sys.argv |> List.tl in
+  let args = Array.to_list (Sys.get_argv ()) |> List.tl_exn in
   parse_args_rec args default_options
 
 
@@ -71,13 +70,13 @@ let select_solver solver_name =
 (* Main function *)
 let () =
   (* Parse arguments *)
-  let width, height, generator_name, solver_name = parse_args () in
+  let {width; height; generator; solver} = parse_args () in
 
   (* Create the maze *)
   let maze = Maze.create width height in
 
   (* Select generator and generate the maze *)
-  let module Generator = (val select_generator generator_name : MAZE_GENERATOR) in
+  let module Generator = (val select_generator generator : MAZE_GENERATOR) in
   Generator.generate maze;
 
   (* Display the generated maze *)
@@ -85,7 +84,7 @@ let () =
   Maze.display maze;
 
   (* Select solver and solve the maze *)
-  let module Solver = (val select_solver solver_name : MAZE_SOLVER) in
+  let module Solver = (val select_solver solver : MAZE_SOLVER) in
   let solution = Solver.solve maze in
 
   (* Display the solved maze with the solution path *)

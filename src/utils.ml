@@ -3,7 +3,10 @@ open Maze
 
 (* Shuffles a list randomly using an auxiliary list of random integers for sorting *)
 let shuffle list =
-  list |> List.map (fun x -> (Random.bits (), x)) |> List.sort compare |> List.map snd
+  list
+  |> List.map ~f:(fun x -> (Random.bits (), x))
+  |> List.sort ~compare:(fun (r1, _) (r2, _) -> Int.compare r1 r2)
+  |> List.map ~f:snd (*|> List.map (fun x -> (Random.bits (), x)) |> List.sort compare |> List.map snd*)
 
 (* Returns a copy of a matrix with a specific element set at position (x, y) *)
 let set_matrix matrix x y value =
@@ -20,41 +23,40 @@ let get_matrix matrix x y = matrix.(y).(x)
 let add_neighbors_to_frontier maze visited x y frontier =
   let cell = Maze.get_cell maze x y in
   let neighbors = Maze.get_neighbors maze cell in
-  List.fold_left (fun acc (_, neighbor) ->
+  List.fold neighbors ~init:frontier ~f:(fun acc (_, neighbor) ->
     if not (get_matrix visited neighbor.x neighbor.y) then
       (x, y, neighbor.x, neighbor.y) :: acc
     else
       acc
-  ) frontier neighbors
+  )
+
 
 (* Removes the nth element from a list, returning the removed element and the updated list *)
 let split_nth lst n =
   let rec aux i acc = function
-    | [] -> raise Not_found
+    | [] -> raise (Not_found_s (Sexp.Atom "split_nth: List is empty"))
     | h :: t -> if i = n then (h, List.rev acc @ t) else aux (i + 1) (h :: acc) t
   in aux 0 [] lst
 
 
 (* Overlay the solution path onto the maze *)
 let overlay_solution maze solution =
-  let grid_with_path =
-    Array.map (fun row ->
-      Array.map (fun cell ->
-        if List.exists (fun (x, y) -> cell.x = x && cell.y = y) solution then
-          { cell with walls = List.map (fun (dir, _) -> (dir, false)) cell.walls }
-        else
-          cell
-      ) row
-    ) maze.grid
-  in
-  { maze with grid = grid_with_path }
-
+  let grid = Maze.get_grid maze in
+  let new_grid = Array.map grid ~f:(fun row ->
+    Array.map row ~f:(fun cell ->
+      if List.exists solution ~f:(fun (x, y) -> cell.x = x && cell.y = y) then
+        { cell with walls = List.map cell.walls ~f:(fun (dir, _) -> (dir, false)) }
+      else
+        cell
+    )
+  ) in
+  Maze.with_grid maze new_grid
 
   (* Converts the maze to HTML for display *)
 let maze_to_html maze solution =
-  let solution_set = List.fold_left (fun acc (x, y) -> (x, y) :: acc) [] solution in
+  let solution_set = List.fold solution ~init:[] ~f:(fun acc (x, y) -> (x, y) :: acc) in
   let cell_to_html cell =
-    let is_in_solution = List.mem (cell.x, cell.y) solution_set in
+    let is_in_solution = List.mem solution_set (cell.x, cell.y) in
     let cell_class =
       if is_in_solution then "cell path"
       else "cell empty"

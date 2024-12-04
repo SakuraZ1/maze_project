@@ -1,23 +1,5 @@
 open Core
 
-(*
-(* Define the direction type representing the four cardinal directions. *)
-type direction = North | South | East | West
-
-(* Define the cell type, representing each cell in the maze. *)
-type cell = {
-  x : int;  
-  y : int;  
-  walls : (direction * bool) list;  
-}
-
-(* Define the maze type, representing the entire maze. *)
-type maze = {
-  width : int;  
-  height : int;  
-  grid : cell array array; 
-}
-  *)
 
  (* Module Type Definition *)
 module type MAZE = sig
@@ -35,6 +17,11 @@ module type MAZE = sig
     height : int;  
     grid : cell array array; 
   }
+
+  val get_width : maze -> int
+  val get_height : maze -> int
+  val get_grid : maze -> cell array array
+  val with_grid : maze -> cell array array -> maze
 
   val create : int -> int -> maze
   val display : maze -> unit
@@ -64,6 +51,12 @@ module Maze : MAZE = struct
     height : int;
     grid : cell array array;
   }
+
+
+let get_width maze = maze.width
+let get_height maze = maze.height
+let get_grid maze = maze.grid
+let with_grid maze new_grid = { maze with grid = new_grid }
 
 (** [create width height] initializes a new maze with the given dimensions and walls on all sides. *)
 let create width height =
@@ -221,32 +214,3 @@ let initialize_cells maze =
 
 end
 
-(*
-(** The module that provides the MAZE interface. *)
-module Maze : MAZE = struct
-
- (* type direction = North | South | East | West
-
-  type cell = {
-    x : int;
-    y : int;
-    walls : (direction * bool) list;
-  }
-
-  type maze = {
-    width : int;
-    height : int;
-    grid : cell array array;
-  }
-*)
-  let create = create
-  let initialize_cells = initialize_cells
-  let display = display
-  let get_cell = get_cell
-  let set_cell = set_cell
-  let in_bounds = in_bounds
-  let get_neighbors = get_neighbors
-  let remove_wall = remove_wall
-  let get_passable_neighbors = get_passable_neighbors
-end
-*)

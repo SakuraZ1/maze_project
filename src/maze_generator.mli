@@ -2,11 +2,15 @@
 open Maze
 
 module type MAZE_GENERATOR = sig
+
+  type cell 
+  type maze 
+  
   (* Generates a maze by modifying the given Maze.maze in-place. *)
   val generate : Maze.maze -> unit
 end
 
-module MakeGenerator : functor (M : MAZE_GENERATOR) -> MAZE_GENERATOR
+module MakeGenerator : (*functor (M : MAZE_GENERATOR) -> *) MAZE_GENERATOR
 
 (* Recursive Backtracking Maze Generator *)
 module RecursiveBacktrackerGenerator : MAZE_GENERATOR
