@@ -79,7 +79,7 @@ module PrimGenerator : MAZE_GENERATOR = struct
             (*Maze.remove_wall maze x1 y1 x2 y2;*)
             let cell1 = Maze.get_cell maze x1 y1 in
             let cell2 = Maze.get_cell maze x2 y2 in
-            Maze.remove_wall maze cell1 cell2;
+            let _ = Maze.remove_wall maze cell1 cell2 in
 
             if not visited.(x2).(y2) then add_frontier x2 y2
           end;
