@@ -6,12 +6,11 @@ module type MAZE = sig
   (* Represents a cell in the maze grid. 
      - x, y: coordinates in the maze.
      - walls: list of directions with a boolean for each indicating if a wall exists in that direction. *)
-  type cell = {
-    x : int;
-    y : int;
-    walls : (direction * bool) list;
-  }
-
+  type cell = Cell.t(*{
+     x : int;  
+     y : int;  
+     walls : (direction * bool) list;  
+   *)
   (* Represents the overall maze structure.
      - width, height: dimensions of the maze.
      - grid: 2D array of cells representing the maze grid. *)

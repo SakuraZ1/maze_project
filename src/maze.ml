@@ -1,15 +1,16 @@
 open Core
+open Cell
 
 
  (* Module Type Definition *)
 module type MAZE = sig
   type direction =  North | South | East | West
 
-  type cell = {
+  type cell = Cell.t(*{
     x : int;  
     y : int;  
     walls : (direction * bool) list;  
-  }
+  }*)
   
 
   type maze = {
