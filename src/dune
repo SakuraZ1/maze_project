@@ -1,8 +1,14 @@
 
 (library
+ (name cell)
+ (public_name cell)
+ (modules Cell))
+
+
+(library
  (name maze)
  (modules maze)
- (libraries core)
+ (libraries core cell)
  )
 
  (library
