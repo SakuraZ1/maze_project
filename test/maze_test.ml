@@ -125,6 +125,48 @@ let () =
         let reinitialized_cell = Maze.get_cell reinitialized_maze 0 0 in
         (* Ensure that the cell has all walls intact after initialization *)
         List.iter reinitialized_cell.walls ~f:(fun (_, exists) -> assert_equal exists true)
+
+
+        let test_find_wall _ =
+          (* Define a set of walls *)
+          let walls = [
+            (North, true);
+            (South, false);
+            (East, true);
+            (West, false);
+          ] in
+          (* Test cases for each direction *)
+          assert_equal
+            ~msg:"Wall in North direction should exist"
+            true
+            (Maze.test_find_wall walls North);
+          
+          assert_equal
+            ~msg:"Wall in South direction should not exist"
+            false
+            (Maze.test_find_wall walls South);
+        
+          assert_equal
+            ~msg:"Wall in East direction should exist"
+            true
+            (Maze.test_find_wall walls East);
+          
+          assert_equal
+            ~msg:"Wall in West direction should not exist"
+            false
+            (Maze.test_find_wall walls West);
+        
+          (* Test for a direction that is not present in the walls list *)
+          let walls_partial = [
+            (North, true);
+            (South, false);
+          ] in
+        
+          assert_equal
+            ~msg:"No wall information for East, should return false by default"
+            false
+            (Maze.test_find_wall walls_partial East)
+
     
   let suite =
     "Maze Tests" >::: [
@@ -136,6 +178,7 @@ let () =
       "test_remove_wall" >:: test_remove_wall;
       "test_get_passable_neighbors" >:: test_get_passable_neighbors;
       "test_initialize_cells" >:: test_initialize_cells;
+      "test_find_wall" >:: test_find_wall;
     ]
   
   let () =

@@ -49,6 +49,9 @@ module type MAZE = sig
 
  (* Initializes cells in the maze, preparing them for use in generation or solving. *)
   val initialize_cells : maze -> maze
+
+  val test_find_wall : (direction * bool) list -> direction -> bool
+
 end
 
 

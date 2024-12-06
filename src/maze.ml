@@ -28,6 +28,7 @@ module type MAZE = sig
   val remove_wall : maze -> cell -> cell -> maze
   val get_passable_neighbors : maze -> cell -> cell list
   val initialize_cells : maze -> maze
+  val test_find_wall : (direction * bool) list -> direction -> bool
 end
 
 
@@ -200,6 +201,7 @@ let initialize_cells maze =
   in
   { maze with grid = new_grid }
 
+  let test_find_wall walls direction = find_wall walls direction
 
 end
 
