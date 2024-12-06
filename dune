@@ -2,10 +2,10 @@
   (target maze_project.zip)
   (deps 
     src/cell.ml
-    src/main.ml
+    server/main.ml
     src/maze_generator.ml
     src/maze_solver.ml
-    src/server.ml
+    server/server.ml
     src/utils.ml
     src/maze.ml
 

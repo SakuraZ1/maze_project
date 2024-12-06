@@ -3,7 +3,7 @@
  (name cell)
  (modules cell)
  (libraries core)
-  (preprocess (pps ppx_jane bisect_ppx))
+  (preprocess (pps ppx_jane))
  )
 
 
@@ -32,20 +32,5 @@
  (name maze_generator)
  (modules maze_generator)
  (libraries maze utils core cell)
-  (preprocess (pps ppx_jane bisect_ppx))
-)
-
-(library
- (name main)
- (modules main)
- (libraries core maze_generator maze_solver maze utils cell)
-  (preprocess (pps ppx_jane bisect_ppx))
-)
-
-
-(executable
- (name server)
- (modules server)
- (libraries dream core main maze_generator maze_solver maze utils cell)
   (preprocess (pps ppx_jane bisect_ppx))
 )
