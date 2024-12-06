@@ -1,0 +1,125 @@
+
+
+(library
+  (name cell)
+  (public_name cell)
+  (libraries core))
+
+(library
+  (name maze)
+  (public_name maze)
+  (libraries core cell))
+
+(library
+  (name maze_generator)
+  (public_name maze_generator)
+  (libraries core maze utils))
+
+(library
+  (name maze_solver)
+  (public_name maze_solver)
+  (libraries core maze utils))
+
+(library
+  (name utils)
+  (public_name utils)
+  (libraries core))
+
+(library
+  (name server)
+  (public_name server)
+  (libraries core maze maze_generator maze_solver utils))
+
+; Test library for Cell module
+(library
+  (name cell_test)
+  (modules cell_test)
+  (libraries
+    ounit2
+    core
+    cell))
+
+; Test library for Maze module
+(library
+  (name maze_test)
+  (modules maze_test)
+  (libraries
+    ounit2
+    core
+    maze))
+
+; Test library for Maze Generator module
+(library
+  (name maze_generator_test)
+  (modules maze_generator_test)
+  (libraries
+    ounit2
+    core
+    maze
+    maze_generator
+    utils))
+
+; Test library for Maze Solver module
+(library
+  (name maze_solver_test)
+  (modules maze_solver_test)
+  (libraries
+    ounit2
+    core
+    maze
+    maze_solver
+    utils))
+
+; Test library for Utils module
+(library
+  (name utils_test)
+  (modules utils_test)
+  (libraries
+    ounit2
+    core
+    utils))
+
+; Individual test targets
+(test
+  (name cell_test)
+  (modules cell_test)
+  (libraries
+    ounit2
+    core
+    cell))
+
+(test
+  (name maze_test)
+  (modules maze_test)
+  (libraries
+    ounit2
+    core
+    maze))
+
+(test
+  (name maze_generator_test)
+  (modules maze_generator_test)
+  (libraries
+    ounit2
+    core
+    maze
+    maze_generator
+    utils))
+
+(test
+  (name maze_solver_test)
+  (modules maze_solver_test)
+  (libraries
+    ounit2
+    core
+    maze
+    maze_solver
+    utils))
+
+(test
+  (name utils_test)
+  (modules utils_test)
+  (libraries
+    ounit2
+    core
+    utils))
