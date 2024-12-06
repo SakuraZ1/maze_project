@@ -35,6 +35,7 @@
     core
     maze
     maze_solver
+    maze_generator
     utils))
 
 ; Test library for Utils module

@@ -27,6 +27,8 @@ let suite =
 let () =
   run_test_tt_main suite
 *)
+
+
  open OUnit2
   open Maze
   open Cell
