@@ -5,13 +5,13 @@ open Maze_generator
 let test_recursive_backtracker _ =
   let maze = Maze.create 5 5 in
   let module Generator = RecursiveBacktrackerGenerator in
-  Generator.generate maze;
+  let _ = Generator.generate maze in
   assert_bool "Maze generation produces a non-empty path" true (* Add your own verification logic *)
 
 let test_prim _ =
   let maze = Maze.create 5 5 in
   let module Generator = PrimGenerator in
-  Generator.generate maze;
+  let _ = Generator.generate maze in
   assert_bool "Maze generation produces a non-empty path" true (* Add your own verification logic *)
 
 let suite =

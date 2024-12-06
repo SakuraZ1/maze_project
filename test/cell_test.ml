@@ -1,4 +1,5 @@
 open OUnit2
+open Core
 open Cell
 
 let test_create_cell _ =
