@@ -1,43 +1,51 @@
 
 (library
  (name cell)
- (public_name cell)
- (modules Cell))
+ (modules cell)
+ (libraries core)
+  (preprocess (pps ppx_jane bisect_ppx))
+ )
 
 
 (library
  (name maze)
  (modules maze)
  (libraries core cell)
+ (preprocess (pps ppx_jane bisect_ppx))
  )
 
  (library
  (name utils)
  (modules utils)
- (libraries core maze)
+ (libraries core maze cell)
+  (preprocess (pps ppx_jane bisect_ppx))
 )
 
 (library
  (name maze_solver)
  (modules maze_solver)
- (libraries maze utils core)
+ (libraries core maze utils cell)
+  (preprocess (pps ppx_jane bisect_ppx))
 )
 
 (library
  (name maze_generator)
  (modules maze_generator)
- (libraries maze utils core)
+ (libraries maze utils core cell)
+  (preprocess (pps ppx_jane bisect_ppx))
 )
 
 (library
  (name main)
  (modules main)
- (libraries core maze_generator maze_solver maze utils)
+ (libraries core maze_generator maze_solver maze utils cell)
+  (preprocess (pps ppx_jane bisect_ppx))
 )
 
 
 (executable
  (name server)
  (modules server)
- (libraries dream core main maze_generator maze_solver maze utils)
+ (libraries dream core main maze_generator maze_solver maze utils cell)
+  (preprocess (pps ppx_jane bisect_ppx))
 )

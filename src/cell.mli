@@ -1,5 +1,3 @@
-(* cell.mli *)
-
 (** Represents a direction in the maze. *)
 type direction =
   | North
@@ -12,7 +10,7 @@ type t = {
   x : int;
   y : int;
   walls : (direction * bool) list;
-}
+} [@@deriving compare, sexp]
 
 (** [compare c1 c2] compares two cells first by their x-coordinate, then by y-coordinate.
     Returns a negative integer if [c1] is less than [c2], zero if equal, and a positive integer otherwise. *)

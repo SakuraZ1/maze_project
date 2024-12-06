@@ -2,27 +2,22 @@ open Core
 open Cell
 
 
- (* Module Type Definition *)
 module type MAZE = sig
-  type direction =  North | South | East | West
+  type direction =  Cell.direction
 
-  type cell = Cell.t(*{
-    x : int;  
-    y : int;  
-    walls : (direction * bool) list;  
-  }*)
+  type cell = Cell.t
   
 
   type maze = {
     width : int;  
     height : int;  
-    grid : cell array array; 
+    grid : cell list list; 
   }
 
   val get_width : maze -> int
   val get_height : maze -> int
-  val get_grid : maze -> cell array array
-  val with_grid : maze -> cell array array -> maze
+  val get_grid : maze -> cell list list
+  val with_grid : maze -> cell list list -> maze
 
   val create : int -> int -> maze
   val display : maze -> unit
@@ -39,18 +34,14 @@ end
 (** The module that provides the MAZE interface. *)
 module Maze : MAZE = struct
   (* Provide the required types *)
-  type direction = North | South | East | West
+  type direction = Cell.direction
 
-  type cell = {
-    x : int;
-    y : int;
-    walls : (direction * bool) list;
-  }
+  type cell = Cell.t
 
   type maze = {
     width : int;
     height : int;
-    grid : cell array array;
+    grid : cell list list;
   }
 
 
@@ -62,8 +53,8 @@ let with_grid maze new_grid = { maze with grid = new_grid }
 (** [create width height] initializes a new maze with the given dimensions and walls on all sides. *)
 let create width height =
   let grid =
-    Array.init width ~f:(fun x ->
-      Array.init height ~f:(fun y ->
+    List.init height ~f:(fun y ->
+      List.init width ~f:(fun x ->
         {
           x = x;
           y = y;
@@ -74,62 +65,63 @@ let create width height =
   in
   { width; height; grid }
 
+let find_wall walls direction =
+  match List.Assoc.find walls direction ~equal:Poly.equal with
+  | Some value -> value
+  | None -> false
+
 
 (** [display maze] prints the maze to the console in ASCII art without using for loops. *)
 let display maze =
   let horizontal_walls =
-    Array.init maze.height ~f:(fun y ->
-      Array.init maze.width ~f:(fun x ->
-        let cell = maze.grid.(x).(y) in
-        match List.Assoc.find cell.walls North ~equal:Poly.equal with
-        | Some true -> "+---"
-        | _ -> "+   "
+    List.map maze.grid ~f:(fun row ->
+      List.map row ~f:(fun cell ->
+        if find_wall cell.walls North then "+---" else "+   "
       )
     )
   in
   let vertical_walls =
-    Array.init maze.height ~f:(fun y ->
-      Array.init maze.width ~f:(fun x ->
-        let cell = maze.grid.(x).(y) in
-        match List.Assoc.find cell.walls West ~equal:Poly.equal with
-        | Some true -> "|   "
-        | _ -> "    "
+    List.map maze.grid ~f:(fun row ->
+      List.map row ~f:(fun cell ->
+        if find_wall cell.walls West then "|   " else "    "
       )
     )
   in
   (* Build the top boundary *)
   let top_boundary =
-    Array.fold ~init:"" ~f:(fun acc _ -> acc ^ "+---") (Array.create ~len:maze.width ()) ^ "+\n"
+    String.concat ~sep:"" (List.init maze.width ~f:(fun _ -> "+---")) ^ "+\n"
   in
-  (* Build the maze string *)
-  let maze_string =
-    Array.foldi horizontal_walls ~init:top_boundary ~f:(fun y acc _ ->
-      let horizontal_line = Array.fold horizontal_walls.(y) ~init:"" ~f:(^) ^ "+\n" in
-      let vertical_line = Array.fold vertical_walls.(y) ~init:"" ~f:(^) ^ "|\n" in
+  (* Build the maze body *)
+  let maze_body =
+    List.fold2_exn horizontal_walls vertical_walls ~init:top_boundary ~f:(fun acc horiz vert ->
+      let horizontal_line = String.concat ~sep:"" horiz ^ "+\n" in
+      let vertical_line = String.concat ~sep:"" vert ^ "|\n" in
       acc ^ vertical_line ^ horizontal_line
     )
   in
-  print_string maze_string
+  print_string maze_body
+
 
 
 
 (** [get_cell maze x y] retrieves the cell at position (x, y) in [maze]. *)
 let get_cell maze x y =
   if x >= 0 && x < maze.width && y >= 0 && y < maze.height then
-    maze.grid.(x).(y)
+    List.nth_exn (List.nth_exn maze.grid y) x
   else
     invalid_arg "get_cell: coordinates out of bounds"
 
 (** [set_cell maze cell] returns a new maze with [cell] updated in the grid. *)
 let set_cell maze cell =
-  if cell.x >= 0 && cell.x < maze.width && cell.y >= 0 && cell.y < maze.height then
-    let new_row = Array.copy maze.grid.(cell.x) in
-    new_row.(cell.y) <- cell;
-    let new_grid = Array.copy maze.grid in
-    new_grid.(cell.x) <- new_row;
-    { maze with grid = new_grid }
-  else
-    invalid_arg "set_cell: cell coordinates out of bounds"
+  let new_grid =
+    List.mapi maze.grid ~f:(fun j row ->
+      if j = cell.y then
+        List.mapi row ~f:(fun i c -> if i = cell.x then cell else c)
+      else
+        row
+    )
+  in
+  { maze with grid = new_grid }
 
 (** [in_bounds maze x y] checks if (x, y) is within the bounds of [maze]. *)
 let in_bounds maze x y =
@@ -164,17 +156,13 @@ let remove_wall maze cell1 cell2 =
     else
       invalid_arg "remove_wall: cells are not adjacent"
   in
-  (* Update walls in cell1 *)
-  let new_walls1 = List.map cell1.walls ~f:(fun (dir, exists) ->
-    if Poly.equal dir dir_to_neighbor then (dir, false) else (dir, exists)
-  ) in
-  let cell1' = { cell1 with walls = new_walls1 } in
-  (* Update walls in cell2 *)
-  let new_walls2 = List.map cell2.walls ~f:(fun (dir, exists) ->
-    if Poly.equal dir dir_to_cell then (dir, false) else (dir, exists)
-  ) in
-  let cell2' = { cell2 with walls = new_walls2 } in
-  (* Update the maze with the new cells *)
+  let update_walls walls target_dir =
+    List.map walls ~f:(fun (dir, exists) ->
+      if Poly.equal dir target_dir then (dir, false) else (dir, exists)
+    )
+  in
+  let cell1' = { cell1 with walls = update_walls cell1.walls dir_to_neighbor } in
+  let cell2' = { cell2 with walls = update_walls cell2.walls dir_to_cell } in
   let maze = set_cell maze cell1' in
   let maze = set_cell maze cell2' in
   maze
@@ -200,8 +188,8 @@ let get_passable_neighbors maze cell =
 (** [initialize_cells maze] returns a new maze with all cells reinitialized with walls on all sides. *)
 let initialize_cells maze =
   let new_grid =
-    Array.init maze.width ~f:(fun x ->
-      Array.init maze.height ~f:(fun y ->
+    List.init maze.height ~f:(fun y ->
+      List.init maze.width ~f:(fun x ->
         {
           x = x;
           y = y;

@@ -1,30 +1,25 @@
 
 module type MAZE = sig
   (* Directions a cell may have walls in. *)
-  type direction = North | South | East | West
-
+  type direction = Cell.direction
   (* Represents a cell in the maze grid. 
      - x, y: coordinates in the maze.
      - walls: list of directions with a boolean for each indicating if a wall exists in that direction. *)
-  type cell = Cell.t(*{
-     x : int;  
-     y : int;  
-     walls : (direction * bool) list;  
-   *)
+  type cell = Cell.t
   (* Represents the overall maze structure.
      - width, height: dimensions of the maze.
      - grid: 2D array of cells representing the maze grid. *)
   type maze = {
     width : int;
     height : int;
-    grid : cell array array;
+    grid : cell list list;
   }
 
    
   val get_width : maze -> int
   val get_height : maze -> int
-  val get_grid : maze -> cell array array
-  val with_grid : maze -> cell array array -> maze
+  val get_grid : maze -> cell list list
+  val with_grid : maze -> cell list list -> maze
 
   (* Creates a maze with given width and height, initializing cells with walls. *)
   val create : int -> int -> maze

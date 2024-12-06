@@ -1,22 +1,30 @@
-open Dream
-open Maze
 
+open Core
+open Maze
+open Cell
+
+(* maze to html *)
 let maze_to_html maze =
-  let rows = Array.to_list maze in
+  let rows = Maze.get_grid maze in
   let row_to_html row =
-    Array.fold_left
-      (fun acc cell ->
-        acc ^ match cell with
-        | Maze.Wall -> "<div class='cell wall'></div>"
-        | Maze.Path -> "<div class='cell path'></div>")
-      "" row
+    List.fold_left row ~init:"" ~f:(fun acc cell ->
+      let walls = List.map cell.walls ~f:(fun (dir, has_wall) ->
+        if has_wall then
+          match dir with
+          | Cell.North -> "border-top: 2px solid black;"
+          | Cell.South -> "border-bottom: 2px solid black;"
+          | Cell.East -> "border-right: 2px solid black;"
+          | Cell.West -> "border-left: 2px solid black;"
+        else ""
+      ) in
+      let style = String.concat ~sep:" " walls in
+      acc ^ Printf.sprintf "<div class='cell' style='%s'></div>" style
+    )
   in
-  String.concat "" (List.map (fun row -> "<div class='row'>" ^ row_to_html row ^ "</div>") rows)
+  String.concat ~sep:"" (List.map rows ~f:(fun row -> "<div class='row'>" ^ row_to_html row ^ "</div>"))
 
 let handler _req =
   let maze = Maze.create 20 20 in
-  
-
   let maze_html = maze_to_html maze in
   let response_html =
     Printf.sprintf
@@ -30,8 +38,6 @@ let handler _req =
           .maze-container { display: inline-block; }
           .row { display: flex; }
           .cell { width: 20px; height: 20px; }
-          .wall { background-color: black; }
-          .path { background-color: white; }
         </style>
       </head>
       <body>
@@ -52,4 +58,3 @@ let () =
   @@ Dream.router [
     Dream.get "/" handler;
   ]
-  @@ Dream.not_found
