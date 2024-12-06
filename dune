@@ -8,6 +8,7 @@
     src/server.ml
     src/utils.ml
     src/maze.ml
+
   )
   (action
     (run zip -R maze_project.zip %{deps})))
