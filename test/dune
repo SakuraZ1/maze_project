@@ -1,4 +1,4 @@
-(library
+(test
   (name cell_test)
   (modules cell_test)
   (libraries
@@ -7,7 +7,7 @@
     cell))
 
 ; Test library for Maze module
-(library
+(test
   (name maze_test)
   (modules maze_test)
   (libraries
@@ -16,7 +16,7 @@
     maze))
 
 ; Test library for Maze Generator module
-(library
+(test
   (name maze_generator_test)
   (modules maze_generator_test)
   (libraries
@@ -27,7 +27,7 @@
     utils))
 
 ; Test library for Maze Solver module
-(library
+(test
   (name maze_solver_test)
   (modules maze_solver_test)
   (libraries
@@ -38,7 +38,7 @@
     utils))
 
 ; Test library for Utils module
-(library
+(test
   (name utils_test)
   (modules utils_test)
   (libraries
