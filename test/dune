@@ -24,7 +24,8 @@
     core
     maze
     maze_generator
-    utils))
+    utils
+    cell))
 
 ; Test library for Maze Solver module
 (test
