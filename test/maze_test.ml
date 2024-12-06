@@ -98,6 +98,33 @@ let () =
     
       assert_bool "Wall removed from cell1 to cell2" wall_between_cell1_and_cell2;
       assert_bool "Wall removed from cell2 to cell1" wall_between_cell2_and_cell1
+
+      let test_get_passable_neighbors _ =
+        (* Initialize a small maze for testing *)
+        let maze = Maze.create 3 3 in
+        (* Get two adjacent cells and remove the wall between them *)
+        let cell1 = Maze.get_cell maze 0 0 in
+        let cell2 = Maze.get_cell maze 1 0 in
+        let updated_maze = Maze.remove_wall maze cell1 cell2 in
+        (* Fetch the updated cell1 *)
+        let cell1_updated = Maze.get_cell updated_maze 0 0 in
+        (* Get passable neighbors for cell1 *)
+        let passable_neighbors = Maze.get_passable_neighbors updated_maze cell1_updated in
+        (* Test that cell2 is a passable neighbor of cell1 *)
+        let passable_neighbor_exists =
+          List.exists passable_neighbors ~f:(fun neighbor -> neighbor.x = cell2.x && neighbor.y = cell2.y)
+        in
+        assert_bool "Cell2 should be a passable neighbor of Cell1" passable_neighbor_exists;
+        (* Test that the number of passable neighbors is correct *)
+        assert_equal ~msg:"Number of passable neighbors" 1 (List.length passable_neighbors)
+            
+      let test_initialize_cells _ =
+        let maze = Maze.create 3 3 in
+        let modified_maze = Maze.set_cell maze { x = 0; y = 0; walls = [(North, false); (South, false); (East, false); (West, false)] } in
+        let reinitialized_maze = Maze.initialize_cells modified_maze in
+        let reinitialized_cell = Maze.get_cell reinitialized_maze 0 0 in
+        (* Ensure that the cell has all walls intact after initialization *)
+        List.iter reinitialized_cell.walls ~f:(fun (_, exists) -> assert_equal exists true)
     
   let suite =
     "Maze Tests" >::: [
@@ -107,6 +134,8 @@ let () =
       "test_in_bounds" >:: test_in_bounds;
       "test_neighbors" >:: test_neighbors;
       "test_remove_wall" >:: test_remove_wall;
+      "test_get_passable_neighbors" >:: test_get_passable_neighbors;
+      "test_initialize_cells" >:: test_initialize_cells;
     ]
   
   let () =
