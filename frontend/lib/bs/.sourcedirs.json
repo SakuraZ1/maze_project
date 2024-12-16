@@ -1,0 +1,1 @@
+{ "dirs" : [ "src" ] , "pkgs" : [ [ "@glennsl/rescript-fetch" , "/Users/julia/maze_project/frontend/node_modules/@glennsl/rescript-fetch" ] , [ "@rescript/react" , "/Users/julia/maze_project/frontend/node_modules/@rescript/react" ] ] , "generated" : [] }

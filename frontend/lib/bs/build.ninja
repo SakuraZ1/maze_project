@@ -1,0 +1,15 @@
+rescript = 1
+g_finger := /Users/julia/maze_project/frontend/node_modules/@rescript/react/lib/ocaml/install.stamp
+g_finger := /Users/julia/maze_project/frontend/node_modules/@glennsl/rescript-fetch/lib/ocaml/install.stamp
+rule astj
+  command = /Users/julia/maze_project/frontend/node_modules/rescript/darwin/bsc.exe  -bs-v 11.1.4 -bs-jsx 4 -uncurried  -absname -bs-ast -o $out $i
+o src/maze.ast : astj ../../src/maze.res
+rule deps
+  command = /Users/julia/maze_project/frontend/node_modules/rescript/darwin/bsb_helper.exe -hash 7dc53b8b75602742a3eb6db8e61c1661 $in
+  restat = 1
+o src/maze.d : deps src/maze.ast
+rule mij
+  command = /Users/julia/maze_project/frontend/node_modules/rescript/darwin/bsc.exe -I src -I /Users/julia/maze_project/frontend/node_modules/@rescript/react/lib/ocaml -I /Users/julia/maze_project/frontend/node_modules/@glennsl/rescript-fetch/lib/ocaml   -uncurried -bs-package-name maze-frontend -bs-package-output commonjs:$in_d:.bs.js -bs-v $g_finger $i
+  dyndep = 1
+  restat = 1
+o src/maze.cmj src/maze.cmi ../../src/maze.bs.js : mij src/maze.ast

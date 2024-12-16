@@ -1,0 +1,16 @@
+{
+  "name": "maze-frontend",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": {
+    "module": "commonjs",
+    "in-source": true
+  },
+  "suffix": ".bs.js",
+  "jsx": { "version": 4 },
+  "bs-dependencies": ["@rescript/react", "@glennsl/rescript-fetch"]
+}

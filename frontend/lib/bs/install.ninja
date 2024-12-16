@@ -1,0 +1,10 @@
+rescript = 1
+rule cp
+  command = cp $i $out
+rule touch
+ command = touch $out
+o maze.cmi : cp ../bs/src/maze.cmi
+o maze.cmj : cp ../bs/src/maze.cmj
+o maze.cmt : cp ../bs/src/maze.cmt
+o maze.res : cp ../../src/maze.res
+build install.stamp : touch maze.cmi maze.cmj 
