@@ -1,12 +1,12 @@
-open Dream
+(*open Dream*)
 open Core
 open Maze_generator
 open Maze_solver
-open Utils
+(*open Utils*)
 open Cell
 open Maze
-open Lwt
-open Lwt.Infix
+(*open Lwt*)
+(*open Lwt.Infix*)
 
 
 (* Utility functions for direction serialization/deserialization *)
@@ -48,7 +48,54 @@ module MazeSerialization = struct
       maze.height
       (String.concat ~sep:"," grid_to_json)
 
+
 let of_json json =
+        let extract_value key json =
+          let key_pattern = Printf.sprintf "\"%s\":" key in
+          match String.substr_index json ~pattern:key_pattern with
+          | None -> failwith (Printf.sprintf "Key '%s' not found in JSON" key)
+          | Some start ->
+            let value_start = start + String.length key_pattern in
+            let rec find_value_end pos =
+              if pos >= String.length json then pos
+              else match json.[pos] with
+                | ',' | '}' -> pos
+                | _ -> find_value_end (pos + 1)
+            in
+            let value_end = find_value_end value_start in
+            String.sub json ~pos:value_start ~len:(value_end - value_start)
+        in
+      
+        let width = Int.of_string (extract_value "width" json) in
+        let height = Int.of_string (extract_value "height" json) in
+        let grid_start = String.index_exn json '[' + 1 in
+        let grid_end = String.rindex_exn json ']' in
+        let grid_json = String.sub json ~pos:grid_start ~len:(grid_end - grid_start) in
+        let grid =
+          String.split grid_json ~on:']'
+          |> List.filter ~f:(Fn.non String.is_empty)
+          |> List.map ~f:(fun row_json ->
+               String.split row_json ~on:'}'
+               |> List.filter ~f:(Fn.non String.is_empty)
+               |> List.map ~f:(fun cell_json ->
+                    let x = Int.of_string (extract_value "x" cell_json) in
+                    let y = Int.of_string (extract_value "y" cell_json) in
+                    let walls_start = String.index_exn cell_json '[' + 1 in
+                    let walls_end = String.index_exn cell_json ']' in
+                    let walls_json = String.sub cell_json ~pos:walls_start ~len:(walls_end - walls_start) in
+                    let walls =
+                      String.split walls_json ~on:'}'
+                      |> List.filter ~f:(Fn.non String.is_empty)
+                      |> List.map ~f:(fun wall_json ->
+                           let dir = Direction.of_string (extract_value "direction" wall_json) in
+                           let has_wall = Bool.of_string (extract_value "has_wall" wall_json) in
+                           (dir, has_wall))
+                    in
+                    { Cell.x; y; walls }))
+        in
+        { Maze.width; height; grid }
+      end
+(*let of_json json =
   let extract_value key json =
     let key_pattern = Printf.sprintf "\"%s\":" key in
     match String.substr_index json ~pattern:key_pattern with
@@ -90,7 +137,7 @@ let of_json json =
               { Cell.x; y; walls }))
   in
   { Maze.width; height; grid }
-
+*)
 
 let generate_maze generator_type =
   match generator_type with
@@ -134,7 +181,24 @@ let astar_solution_handler req =
     let maze = MazeSerialization.of_json body in
     let response = astar_solution maze in
     Dream.respond response
+
 let homepage_handler _req =
+      Dream.html
+        {|<!DOCTYPE html>
+           <html lang="en">
+           <head>
+             <meta charset="UTF-8">
+             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+             <title>Maze Solver</title>
+           </head>
+           <body>
+             <div id="root"></div>
+             <script src="/frontend/maze.bs.js"></script>
+           </body>
+           </html>
+        |}
+    
+(*let homepage_handler _req =
   Lwt.return
     (Dream.html
        {|
@@ -150,10 +214,13 @@ let homepage_handler _req =
          <script src="/static/frontend_maze_solver.bs.js"></script>
        </body>
        </html>
-       |})
+       |})*)
+       
+let not_found_handler _req =
+        Dream.empty `Not_Found
 
 let () =
-  Dream.run
+  Dream.run ~port:8081
   @@ Dream.logger
   @@ Dream.router [
        Dream.get "/generate" generate_maze_handler;
@@ -161,7 +228,10 @@ let () =
        Dream.post "/solve/astar" astar_solution_handler;
        Dream.get "/static/:path" (Dream.static "./src");
        Dream.get "/" homepage_handler;
+
+       (* Any request that reaches this point wasn't matched above, so return a 404 *)
+       Dream.any "/**" not_found_handler;
      ]
-  @@ Dream.not_found
+  (*@@ not_found_handler Dream.not_found*)
 
 

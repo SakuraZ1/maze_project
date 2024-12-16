@@ -1,56 +1,105 @@
-// ReScript Frontend for Maze Solver
+open ReactDOM;
 
-open ReactDom;
+open Fetch
 
-let sendRequest = (url, callback) => {
-  fetch(url)
-  ->then(res => res.json())
-  ->then(callback)
-  ->catch(err => Js.log(err));
-};
+let sendRequest = (url, method_, body, callback) => {
+  // Create headers as a JavaScript-compatible object
+  let headers = Js.Dict.empty()
+  Js.Dict.set(headers, "Content-Type", "application/json")
+  // Create options object
+  let options = Fetch.RequestInit.make(
+    ~method_=method_,
+    ~headers,
+    ~body=?body->Option.map(Js.Json.stringify),
+    (),
+  )
 
-[@react.component]
+  Fetch.fetch(url, options)
+  ->Js.Promise.then_(res => res.json())
+  ->Js.Promise.then_(callback)
+  ->Js.Promise.catch(err => Js.log(err))
+}
+
+
+
+
+@react.component
 let app = () => {
   let (mazeData, setMazeData) = React.useState(() => None);
   let (solutionPath, setSolutionPath) = React.useState(() => None);
+  let (generatorType, setGeneratorType) = React.useState(() => "recursive_backtracker");
 
   let generateMaze = () => {
-    sendRequest("/generate", data => setMazeData(Some(data)));
+    sendRequest(`/generate?type=${generatorType}`, "GET", None, data => setMazeData(Some(data)));
   };
 
-  let solveMaze = (solver) => {
+  let solveMaze = solver => {
     let url = switch solver {
-      | `BFS => "/solve/bfs"
-      | `AStar => "/solve/astar"
+      | "BFS" => "/solve/bfs"
+      | "AStar" => "/solve/astar"
     };
-    sendRequest(url, data => setSolutionPath(Some(data)));
+    mazeData->Belt.Option.mapWithDefault(() => Js.log("No maze to solve"), maze => {
+      sendRequest(url, "POST", Some(maze), data => setSolutionPath(Some(data)));
+    });
   };
 
-  let renderMaze = (mazeData) => {
-    // Logic to render the maze visually from mazeData
-    <div>"Maze Rendered Here"</div>
+  let handleMove = direction => {
+    Js.log2("Move requested:", direction);
+    // Logic for step-based movement can be added here if required
   };
 
-  let renderPath = (path) => {
-    // Logic to overlay solution path on the maze
-    <div>"Path Rendered Here"</div>
+  let renderMaze = mazeData => {
+    // Render maze visually
+    <div className="maze">
+      {mazeData["grid"]->Js.Array.map(row =>
+        <div className="maze-row">
+          {row->Js.Array.map(cell =>
+            <div
+              className={`maze-cell ${cell["walls"]->Js.Array.map(wall => wall["has_wall"])->Belt.Array.someTrue ? "wall" : "path"}`}
+            ></div>
+          )}
+        </div>
+      )}
+    </div>
+  };
+
+  let renderPath = path => {
+    // Overlay solution path on the maze
+    <div className="path">
+      {path["path"]->Js.Array.map(step =>
+        <div className="path-step">{`(${step[0]}, ${step[1]})`}</div>
+      )}
+    </div>
   };
 
   <div>
-    <button onClick={_ => generateMaze()}>"Generate Maze"</button>
+    <div>
+      <select value={generatorType} onChange={e => setGeneratorType(ReactEvent.Form.target(e)->ReactEvent.Form.value)}>
+        <option value="recursive_backtracker">"Recursive Backtracker"</option>
+        <option value="prim">"Prim's Algorithm"</option>
+        <option value="kruskal">"Kruskal's Algorithm"</option>
+      </select>
+      <button onClick={_ => generateMaze()}>{"Generate Maze"}</button>
+    </div>
     {
       switch mazeData {
-      | None => <div>"No Maze Yet"</div>
+      | None => <div>{"No Maze Yet"}</div>
       | Some(maze) => <div>
           {renderMaze(maze)}
-          <button onClick={_ => solveMaze(`BFS)}>"BFS Solution"</button>
-          <button onClick={_ => solveMaze(`AStar)}>"A* Solution"</button>
+          <button onClick={_ => solveMaze(`BFS`)}>{"BFS Solution"}</button>
+          <button onClick={_ => solveMaze(`AStar`)}>{"A* Solution"}</button>
+          <div>
+            <button onClick={_ => handleMove("up")}>{"Move Up"}</button>
+            <button onClick={_ => handleMove("down")}>{"Move Down"}</button>
+            <button onClick={_ => handleMove("left")}>{"Move Left"}</button>
+            <button onClick={_ => handleMove("right")}>{"Move Right"}</button>
+          </div>
         </div>
       }
     }
     {
       switch solutionPath {
-      | None => <div>"No Solution Yet"</div>
+      | None => <div>{"No Solution Yet"}</div>
       | Some(path) => renderPath(path)
       }
     }

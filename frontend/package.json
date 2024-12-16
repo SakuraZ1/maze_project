@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@glennsl/rescript-fetch": "^0.2.3",
+    "@rescript/react": "^0.13.0",
     "rescript": "^11.1.4"
   }
 }
