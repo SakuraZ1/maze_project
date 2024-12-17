@@ -1,0 +1,20 @@
+{
+    "name": "frontend",
+    "sources": {
+      "dir": "src",
+      "subdirs": true
+    },
+    "bs-dependencies": [
+      "@rescript/react",
+      "@glennsl/rescript-fetch"
+    ],
+    "package-specs": {
+      "module": "es6",
+      "in-source": true
+    },
+    "suffix": ".res",
+    "namespace": true,
+    "reason": { "react-jsx": 3 },
+    "refmt": 3
+  }
+  
