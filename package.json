@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@glennsl/rescript-fetch": "^0.2.3",
     "rescript": "^11.1.4"
   }
 }

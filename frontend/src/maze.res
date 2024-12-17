@@ -1,26 +1,46 @@
-open ReactDOM;
-
+open ReactDOM
 open Fetch
 
-let sendRequest = (url, method_, body, callback) => {
-  // Create headers as a JavaScript-compatible object
-  let headers = Js.Dict.empty()
-  Js.Dict.set(headers, "Content-Type", "application/json")
-  // Create options object
-  let options = Fetch.RequestInit.make(
-    ~method_=method_,
-    ~headers,
-    ~body=?body->Option.map(Js.Json.stringify),
-    (),
-  )
 
+/* Corrected sendRequest function */
+let sendRequest = (
+  url: string,
+  method_: string,
+  body: option<Js.Json.t>,
+  callback: Js.Json.t => unit
+) => {
+  /* Convert the optional JSON body to a string, defaulting to an empty string */
+  let bodyString =
+    body
+    ->Belt.Option.map(Js.Json.stringify)
+    ->Belt.Option.getWithDefault("")
+
+  /* Define headers as an array of tuples */
+  let headers: array<(string, string)> = [("Content-Type", "application/json")]
+
+  /* Constructing the RequestInit record manually */
+  let options: requestInit = {
+    method_: Some(method_),
+    headers: Some(headers),
+    body: Some(bodyString),
+    referrer: None,
+    referrerPolicy: None,
+    mode: None,
+    credentials: None,
+    cache: None,
+    redirect: None,
+    integrity: None,
+    keepalive: None,
+    signal: None,
+    window_: None,
+  }
+
+  /* Call Fetch.fetch with the URL and options */
   Fetch.fetch(url, options)
   ->Js.Promise.then_(res => res.json())
   ->Js.Promise.then_(callback)
   ->Js.Promise.catch(err => Js.log(err))
 }
-
-
 
 
 @react.component
