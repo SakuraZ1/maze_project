@@ -16,31 +16,21 @@ let sendRequest = (
     ->Belt.Option.getWithDefault("")
 
   /* Define headers as an array of tuples */
-  let headers: array<(string, string)> = [("Content-Type", "application/json")]
+  let headers: array<(string, string)> = [("Content-Type", "application/json")]}
 
-  /* Constructing the RequestInit record manually */
-  let options: requestInit = {
-    method_: Some(method_),
-    headers: Some(headers),
-    body: Some(bodyString),
-    referrer: None,
-    referrerPolicy: None,
-    mode: None,
-    credentials: None,
-    cache: None,
-    redirect: None,
-    integrity: None,
-    keepalive: None,
-    signal: None,
-    window_: None,
-  }
+ /* Construct the RequestInit record using Fetch.RequestInit.make */
+  let options = RequestInit.make(
+    ~method_=Some(method_),
+    ~headers=Some(headers),
+    ~body=Some(bodyString),
+    ()
+  )
 
   /* Call Fetch.fetch with the URL and options */
   Fetch.fetch(url, options)
   ->Js.Promise.then_(res => res.json())
   ->Js.Promise.then_(callback)
   ->Js.Promise.catch(err => Js.log(err))
-}
 
 
 @react.component

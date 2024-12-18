@@ -21,6 +21,7 @@ module type MAZE = sig
 
   val create : int -> int -> maze
   val display : maze -> unit
+  val display_with_solution : maze -> (int * int) list -> unit
   val get_cell : maze -> int -> int -> cell
   val set_cell : maze -> cell -> maze
   val in_bounds : maze -> int -> int -> bool
@@ -103,7 +104,45 @@ let display maze =
   print_string maze_body
 
 
-
+  let display_with_solution maze solution =
+    let is_on_solution x y =
+      List.exists solution ~f:(fun (sx, sy) -> sx = x && sy = y)
+    in
+  
+    let horizontal_walls =
+      List.map maze.grid ~f:(fun row ->
+        List.map row ~f:(fun cell ->
+          if List.Assoc.find_exn cell.walls North ~equal:Poly.equal then "+---"
+          else "+   "
+        )
+      )
+    in
+  
+    let vertical_walls =
+      List.map maze.grid ~f:(fun row ->
+        List.map row ~f:(fun cell ->
+          let cell_content =
+            if is_on_solution cell.x cell.y then " * " else "   "
+          in
+          if List.Assoc.find_exn cell.walls West ~equal:Poly.equal then "|" ^ cell_content
+          else " " ^ cell_content
+        )
+      )
+    in
+  
+    let top_boundary =
+      String.concat ~sep:"" (List.init maze.width ~f:(fun _ -> "+---")) ^ "+\n"
+    in
+  
+    let maze_string =
+      List.fold2_exn horizontal_walls vertical_walls ~init:top_boundary ~f:(fun acc horiz vert ->
+        let horizontal_line = String.concat ~sep:"" horiz ^ "+\n" in
+        let vertical_line = String.concat ~sep:"" vert ^ "|\n" in
+        acc ^ vertical_line ^ horizontal_line
+      )
+    in
+    print_string maze_string
+  
 
 (** [get_cell maze x y] retrieves the cell at position (x, y) in [maze]. *)
 let get_cell maze x y =

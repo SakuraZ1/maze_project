@@ -26,6 +26,14 @@ module type MAZE = sig
 
   (* Displays the maze structure, showing walls and paths. Useful for debugging or visual output. *)
   val display : maze -> unit
+  
+(** [display_with_solution maze solution] prints the maze with the solution path highlighted.
+    Cells on the solution path are marked visually (e.g., with '*' characters).
+
+    @param maze The maze to display.
+    @param solution A list of (x, y) coordinates representing the solution path.
+*)
+val display_with_solution : maze -> (int * int) list -> unit
 
   (* Retrieves the cell at specific coordinates (x, y) in the maze. *)
   val get_cell : maze -> int -> int -> cell

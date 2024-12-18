@@ -14,7 +14,7 @@
     },
     "suffix": ".res",
     "namespace": true,
-    "reason": { "react-jsx": 3 },
-    "refmt": 3
+    "react-jsx": 3,
+    "format": "auto"
   }
   

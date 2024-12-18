@@ -1,16 +1,19 @@
-#Start(1734421376717)
+#Start(1734457165362)
 
   We've found a bug for you!
-  /mnt/c/Users/haoy3/Desktop/FP/project_1/maze_project/frontend/src/maze.res:22:16-32
+  /mnt/c/Users/haoy3/Desktop/FP/project_1/maze_project/frontend/src/maze.res:22:17-32
 
   20 │ 
-  21 │   /* Constructing the RequestInit record manually */
-  22 │   let options: Fetch.requestInit = {
-  23 │     method_: Some(method_),
-  24 │     headers: Some(headers),
+  21 │  /* Construct the RequestInit record using Fetch.RequestInit.make */
+  22 │   let options = RequestInit.make(
+  23 │     ~method_=Some(method_),
+  24 │     ~headers=Some(headers),
 
-  This type constructor, `Fetch.requestInit`, can't be found.
-  If you wanted to write a recursive type, don't forget the `rec` in `type rec`
+  The module or file RequestInit can't be found.
+  - If it's a third-party dependency:
+    - Did you add it to the "bs-dependencies" or "bs-dev-dependencies" in bsconfig.json?
+  - Did you include the file's directory to the "sources" in bsconfig.json?
+  
 
 FAILED: cannot make progress due to previous errors.
-#Done(1734421377723)
+#Done(1734457166352)
