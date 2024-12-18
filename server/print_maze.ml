@@ -4,8 +4,8 @@ open Maze_generator
 open Maze_solver
 open Cell
 
-(* Display the maze with a solution overlay while keeping the original maze intact. *)
-(** [display_with_solution maze solution] displays the maze with the solution path overlaid,
+
+(* [display_with_solution maze solution] displays the maze with the solution path overlaid,
     without modifying the original maze structure. *)
     let display_with_solution maze solution =
       let is_on_solution x y =
@@ -64,10 +64,10 @@ let read_positive_int prompt =
   try
     let input = In_channel.input_line_exn In_channel.stdin in
     let value = Int.of_string input in
-    if value > 0 then value
-    else failwith "Dimension must be a positive integer."
+    if value > 2 && value < 20 then value
+    else failwith "Invalid input: Please enter a positive integer and be in > 2 and < 20, Or you will not see a nice Maze!"
   with
-  | Failure _ -> failwith "Invalid input: Please enter a positive integer, Or you will not see a nice Maze!"
+  | Failure _ -> failwith "Invalid input: Please enter a positive integer and be in > 2 and < 20, Or you will not see a nice Maze!"
   | exn -> raise exn
 
 (* Function to read and validate algorithm selection *)
@@ -164,5 +164,5 @@ let () =
 
   (* Overlay the solution path and print the solved maze *)
 
-Printf.printf "\nSolved Maze (with %s path):\n" (String.uppercase solver_name);
+Printf.printf "\nSolution (with %s path):\n" (String.uppercase solver_name);
 display_with_solution generated_maze solution;
