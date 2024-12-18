@@ -77,12 +77,13 @@ let read_algorithm prompt valid_algorithms =
   let rec validate_input () =
     match In_channel.input_line In_channel.stdin with
     | Some input ->
-      let normalized = normalize_input input in
-      (match List.find valid_algorithms ~f:(fun algo -> String.equal algo normalized) with
+      (let normalized = normalize_input input in
+      let check_algo = List.find valid_algorithms ~f:(fun algo -> String.equal algo normalized) in
+      match check_algo with
        | Some algo -> algo
        | None ->
-         Printf.printf "Invalid choice. Please select a valid algorithm.\n";
-         validate_input ())
+        print_endline "Invalid choice. Please select a valid algorithm.\n";
+        validate_input ())
     | None -> failwith "No input received."
   in
   validate_input ()
