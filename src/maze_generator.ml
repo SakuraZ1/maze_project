@@ -23,14 +23,13 @@ module RecursiveBacktrackerGenerator : MAZE_GENERATOR = struct
   type cell = Maze.cell
 
   let rec generate maze =
-    (* 确保入口是开放的 *)
     let maze = mark_entrance maze in
 
     let width = Maze.get_width maze in
     let height = Maze.get_height maze in
     let visited = Utils.make_matrix_as_list width height false in
 
-    (* 递归回溯挖掘路径 *)
+   
     let rec carve_passages_from maze visited x y =
       if List.nth_exn (List.nth_exn visited y) x then maze, visited
       else
@@ -59,14 +58,14 @@ module RecursiveBacktrackerGenerator : MAZE_GENERATOR = struct
     in
     let maze, _ = carve_passages_from maze visited 0 0 in
 
-    (* 确保有路径从入口到出口 *)
+    
     if path_exists maze (0, 0) (width - 1, height - 1) then
       begin
-        Maze.display maze; (* 打印生成的迷宫 *)
+        Maze.display maze; 
         maze
       end
     else
-      generate maze (* 如果没有路径，重新生成迷宫 *)
+      generate maze 
 end
 
 

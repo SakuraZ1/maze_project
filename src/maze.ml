@@ -103,44 +103,52 @@ let display maze =
 
 
 
-  let display_with_solution maze solution =
-    let is_on_solution x y =
-      List.exists solution ~f:(fun (sx, sy) -> sx = x && sy = y)
-    in
-  
-    let horizontal_walls =
-      List.map maze.grid ~f:(fun row ->
-        List.map row ~f:(fun cell ->
-          if List.Assoc.find_exn cell.walls North ~equal:Poly.equal then "+---"
-          else "+   "
-        )
-      )
-    in
-  
-    let vertical_walls =
-      List.map maze.grid ~f:(fun row ->
-        List.map row ~f:(fun cell ->
-          let cell_content =
-            if is_on_solution cell.x cell.y then " * " else "   "
+
+
+    let display_with_solution maze solution =
+      let is_on_solution x y =
+        List.exists solution ~f:(fun (sx, sy) -> sx = x && sy = y)
+      in
+    
+      (* Top boundary of the maze *)
+      let top_boundary =
+        String.concat ~sep:"" (List.init maze.width ~f:(fun _ -> "+---")) ^ "+\n"
+      in
+    
+      (* Generate the maze rows *)
+      let maze_string =
+        List.fold maze.grid ~init:top_boundary ~f:(fun acc row ->
+          let horizontal_line =
+            List.fold row ~init:"" ~f:(fun line cell ->
+              let north_wall =
+                if List.Assoc.find_exn cell.walls North ~equal:Poly.equal then "+---"
+                else "+   "
+              in
+              line ^ north_wall
+            )
           in
-          if List.Assoc.find_exn cell.walls West ~equal:Poly.equal then "|" ^ cell_content
-          else " " ^ cell_content
+          let horizontal_line = horizontal_line ^ "+\n" in
+    
+          let vertical_line =
+            List.fold row ~init:"" ~f:(fun line cell ->
+              let content =
+                if is_on_solution cell.x cell.y then " * " else "   "
+              in
+              let west_wall =
+                if List.Assoc.find_exn cell.walls West ~equal:Poly.equal then "|" else " "
+              in
+              line ^ west_wall ^ content
+            )
+          in
+          let vertical_line = vertical_line ^ "|\n" in
+    
+          acc ^ vertical_line ^ horizontal_line
         )
-      )
-    in
-  
-    let top_boundary =
-      String.concat ~sep:"" (List.init maze.width ~f:(fun _ -> "+---")) ^ "+\n"
-    in
-  
-    let maze_string =
-      List.fold2_exn horizontal_walls vertical_walls ~init:top_boundary ~f:(fun acc horiz vert ->
-        let horizontal_line = String.concat ~sep:"" horiz ^ "+\n" in
-        let vertical_line = String.concat ~sep:"" vert ^ "|\n" in
-        acc ^ vertical_line ^ horizontal_line
-      )
-    in
-    print_string maze_string
+      in
+    
+      (* Print the maze *)
+      print_string maze_string
+    
   
 
 (** [get_cell maze x y] retrieves the cell at position (x, y) in [maze]. *)

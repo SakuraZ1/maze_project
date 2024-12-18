@@ -1,12 +1,10 @@
-(*open Dream*)
+
 open Core
 open Maze_generator
 open Maze_solver
-(*open Utils*)
 open Cell
 open Maze
-(*open Lwt*)
-(*open Lwt.Infix*)
+
 
 
 (* Utility functions for direction serialization/deserialization *)
@@ -95,49 +93,6 @@ let of_json json =
         in
         { Maze.width; height; grid }
       end
-(*let of_json json =
-  let extract_value key json =
-    let key_pattern = Printf.sprintf "\"%s\":" key in
-    match String.substr_index json ~pattern:key_pattern with
-    | None -> failwith (Printf.sprintf "Key '%s' not found in JSON" key)
-    | Some start ->
-      let value_start = start + String.length key_pattern in
-      let value_end =
-        Option.value
-          ~default:(String.length json)
-          (String.lfindi_from json ~pos:value_start ~f:(fun _ c -> c = ',' || c = '}'))
-      in
-      String.sub json ~pos:value_start ~len:(value_end - value_start)
-  in
-  let width = Int.of_string (extract_value "width" json) in
-  let height = Int.of_string (extract_value "height" json) in
-  let grid_start = String.index_exn json '[' + 1 in
-  let grid_end = String.rindex_exn json ']' in
-  let grid_json = String.sub json ~pos:grid_start ~len:(grid_end - grid_start) in
-  let grid =
-    String.split grid_json ~on:']'
-    |> List.filter ~f:(Fn.non String.is_empty)
-    |> List.map ~f:(fun row_json ->
-         String.split row_json ~on:'}'
-         |> List.filter ~f:(Fn.non String.is_empty)
-         |> List.map ~f:(fun cell_json ->
-              let x = Int.of_string (extract_value "x" cell_json) in
-              let y = Int.of_string (extract_value "y" cell_json) in
-              let walls_start = String.index_exn cell_json '[' + 1 in
-              let walls_end = String.index_exn cell_json ']' in
-              let walls_json = String.sub cell_json ~pos:walls_start ~len:(walls_end - walls_start) in
-              let walls =
-                String.split walls_json ~on:'}'
-                |> List.filter ~f:(Fn.non String.is_empty)
-                |> List.map ~f:(fun wall_json ->
-                     let dir = Direction.of_string (extract_value "direction" wall_json) in
-                     let has_wall = Bool.of_string (extract_value "has_wall" wall_json) in
-                     (dir, has_wall))
-              in
-              { Cell.x; y; walls }))
-  in
-  { Maze.width; height; grid }
-*)
 
 let generate_maze generator_type =
   match generator_type with
@@ -198,23 +153,7 @@ let homepage_handler _req =
            </html>
         |}
     
-(*let homepage_handler _req =
-  Lwt.return
-    (Dream.html
-       {|
-       <!DOCTYPE html>
-       <html lang="en">
-       <head>
-         <meta charset="UTF-8">
-         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-         <title>Maze Solver</title>
-       </head>
-       <body>
-         <div id="root"></div>
-         <script src="/static/frontend_maze_solver.bs.js"></script>
-       </body>
-       </html>
-       |})*)
+
        
 let not_found_handler _req =
         Dream.empty `Not_Found

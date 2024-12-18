@@ -16,6 +16,6 @@
 (executable
   (name print_maze)
   (modules print_maze)
-  (libraries core maze maze_generator maze_solver utils)
+  (libraries cell core maze maze_generator maze_solver utils)
   (preprocess (pps ppx_jane lwt_ppx))
 )
