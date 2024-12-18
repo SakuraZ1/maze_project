@@ -4,7 +4,6 @@ open Core
 open Cell
 
 module type MAZE_GENERATOR = sig
-
   type cell 
   type maze
 
@@ -23,10 +22,15 @@ module RecursiveBacktrackerGenerator : MAZE_GENERATOR = struct
   type maze = Maze.maze 
   type cell = Maze.cell
 
-  let generate maze =
+  let rec generate maze =
+    (* 确保入口是开放的 *)
+    let maze = mark_entrance maze in
+
     let width = Maze.get_width maze in
     let height = Maze.get_height maze in
     let visited = Utils.make_matrix_as_list width height false in
+
+    (* 递归回溯挖掘路径 *)
     let rec carve_passages_from maze visited x y =
       if List.nth_exn (List.nth_exn visited y) x then maze, visited
       else
@@ -53,19 +57,29 @@ module RecursiveBacktrackerGenerator : MAZE_GENERATOR = struct
             (maze, visited)
         )
     in
-    fst (carve_passages_from maze visited 0 0)
+    let maze, _ = carve_passages_from maze visited 0 0 in
+
+    (* 确保有路径从入口到出口 *)
+    if path_exists maze (0, 0) (width - 1, height - 1) then
+      begin
+        Maze.display maze; (* 打印生成的迷宫 *)
+        maze
+      end
+    else
+      generate maze (* 如果没有路径，重新生成迷宫 *)
 end
+
+
 
 (* Prim's Algorithm Maze Generator *)
 module PrimGenerator : MAZE_GENERATOR = struct
   type maze = Maze.maze
   type cell = Maze.cell
 
-  let generate maze =
+  let rec generate maze =
     let width = Maze.get_width maze in
     let height = Maze.get_height maze in
 
-    (* Initialization with immutable *)
     let visited = make_matrix_as_list width height false in
 
     let add_neighbors_to_frontier frontier x y visited =
@@ -81,7 +95,7 @@ module PrimGenerator : MAZE_GENERATOR = struct
     let rec process_frontier maze visited frontier =
       match frontier with
       | [] -> maze  
-      | (x1, y1, x2, y2) :: rest ->
+      | (x1, y1, x2, y2) :: rest -> 
         if List.nth_exn (List.nth_exn visited y2) x2 then
           process_frontier maze visited rest
         else
@@ -95,7 +109,13 @@ module PrimGenerator : MAZE_GENERATOR = struct
     let x0 = Random.int width in
     let y0 = Random.int height in
     let frontier, visited = add_neighbors_to_frontier [] x0 y0 visited in
-    process_frontier maze visited frontier
+    let maze = process_frontier maze visited frontier in
+
+    (* Ensure there is a path between start (0, 0) and end (width - 1, height - 1) *)
+    if path_exists maze (0, 0) (width - 1, height - 1) then
+      maze
+    else
+      generate maze (* Retry if no path exists *)
 end
 
 (* Kruskal's Algorithm Maze Generator *)
@@ -110,23 +130,17 @@ module KruskalGenerator : MAZE_GENERATOR = struct
   module C_map = Map.Make(Component_map)
 
   let initialize_components maze =
-    let cells =
-      Maze.get_grid maze
-      |> List.concat (* 'a list list to 'a list *)               
-    in
+    let cells = Maze.get_grid maze |> List.concat in
     List.foldi cells ~init:C_map.empty ~f:(fun i acc cell ->
       Map.set acc ~key:cell ~data:i
     )
 
-  (* find the component id of a cell *)
   let find_component components cell =
     Map.find_exn components cell
 
-  (* merge two components, map all cells in id2 to id1 *)
   let merge_components components id1 id2 =
     Map.map components ~f:(fun id -> if id = id2 then id1 else id)
 
-  (* collect all possible walls in the maze, avoid duplicates *)
   let collect_walls maze =
     let width = Maze.get_width maze in
     let height = Maze.get_height maze in
@@ -150,7 +164,6 @@ module KruskalGenerator : MAZE_GENERATOR = struct
     in
     collect 0 0 []
 
-  (* recursively process walls and generate the new maze *)
   let rec process_walls maze walls components =
     match walls with
     | [] -> maze
@@ -164,9 +177,14 @@ module KruskalGenerator : MAZE_GENERATOR = struct
       else
         process_walls maze rest components
 
-
-  let generate maze =
+  let rec generate maze =
     let components = initialize_components maze in
     let walls = collect_walls maze |> Utils.shuffle in
-    process_walls maze walls components
+    let maze = process_walls maze walls components in
+
+    (* Ensure there is a path between start (0, 0) and end (width - 1, height - 1) *)
+    if path_exists maze (0, 0) (Maze.get_width maze - 1, Maze.get_height maze - 1) then
+      maze
+    else
+      generate maze (* Retry if no path exists *)
 end

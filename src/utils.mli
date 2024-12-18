@@ -25,3 +25,7 @@ val split_nth : 'a list -> int -> 'a * 'a list
 (** [overlay_solution maze solution] returns a new maze with the solution path [solution] overlaid
     onto it, for visualization purposes. *)
 val overlay_solution : Maze.maze -> (int * int) list -> Maze.maze
+
+val path_exists : Maze.maze -> (int * int) -> (int * int) -> bool
+
+val mark_entrance: Maze.maze -> Maze.maze

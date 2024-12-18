@@ -63,3 +63,37 @@ let overlay_solution maze solution =
     )
   in
   Maze.with_grid maze new_grid
+
+
+let path_exists maze start (end_: (int * int)) =
+    let rec dfs visited (x, y) =
+      (* If we've reached the end point, return true *)
+      let (u, v) = end_ in
+      if x = u && y = v then true
+      else if List.exists visited ~f:(fun (vx, vy) -> vx = x && vy = y) then false
+      else
+        let cell = Maze.get_cell maze x y in
+        (* Add the current cell to visited list *)
+        let visited' = (x, y) :: visited in
+        (* Get all passable neighbors of the current cell *)
+        let neighbors = Maze.get_passable_neighbors maze cell in
+        List.exists neighbors ~f:(fun neighbor -> dfs visited' (neighbor.x, neighbor.y))
+    in
+    dfs [] start
+
+
+let mark_entrance maze =
+  let entrance = Maze.get_cell maze 0 0 in
+  let neighbors = Maze.get_neighbors maze entrance in
+
+  List.iter neighbors ~f:(fun (_, neighbor) ->
+    let cell1 = Maze.get_cell maze 0 0 in
+    let cell2 = neighbor in
+    let maze = Maze.remove_wall maze cell1 cell2 in
+    ignore maze
+  );
+
+  maze
+
+
+  

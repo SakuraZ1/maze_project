@@ -78,22 +78,20 @@ let display maze =
   let horizontal_walls =
     List.map maze.grid ~f:(fun row ->
       List.map row ~f:(fun cell ->
-        if find_wall cell.walls North then "+---" else "+   "
+        if List.Assoc.find_exn cell.walls South ~equal:Poly.equal then "+---" else "+   "
       )
     )
   in
   let vertical_walls =
     List.map maze.grid ~f:(fun row ->
-      List.map row ~f:(fun cell ->
-        if find_wall cell.walls West then "|   " else "    "
+      List.map row ~f:(fun cell -> 
+        if List.Assoc.find_exn cell.walls West ~equal:Poly.equal then "|   " else "    "
       )
     )
   in
-  (* Build the top boundary *)
   let top_boundary =
     String.concat ~sep:"" (List.init maze.width ~f:(fun _ -> "+---")) ^ "+\n"
   in
-  (* Build the maze body *)
   let maze_body =
     List.fold2_exn horizontal_walls vertical_walls ~init:top_boundary ~f:(fun acc horiz vert ->
       let horizontal_line = String.concat ~sep:"" horiz ^ "+\n" in
@@ -102,6 +100,7 @@ let display maze =
     )
   in
   print_string maze_body
+
 
 
   let display_with_solution maze solution =
@@ -184,28 +183,56 @@ let get_neighbors maze cell =
 
 
 
-(** [remove_wall maze cell1 cell2] returns a new maze with the wall between [cell1] and [cell2] removed. *)
+(** [remove_wall maze cell1 cell2] returns a new maze with the wall between [cell1] and [cell2] removed. *)(* 打印单元格的墙壁状态 *)
+(*
+let string_of_direction dir =
+  match dir with
+  | Cell.North -> "North"
+  | Cell.South -> "South"
+  | Cell.East -> "East"
+  | Cell.West -> "West"
+let print_wall_status cell =
+  let directions = [Cell.North; Cell.South; Cell.East; Cell.West] in
+  Printf.printf "Wall status for cell (%d, %d) before removal:\n" cell.x cell.y;
+  List.iter directions ~f:(fun dir ->
+    (* 检查当前方向的墙是否存在 *)
+    let wall_exists = List.exists cell.walls ~f:(fun (d, exists) -> Poly.equal d dir && exists) in
+    Printf.printf "Direction %s: %b\n" 
+      (string_of_direction dir) wall_exists
+  )
+*)
 let remove_wall maze cell1 cell2 =
   let dx = cell2.x - cell1.x in
   let dy = cell2.y - cell1.y in
+
+  (* 检查单元格是否相邻 *)
+  if abs dx > 1 || abs dy > 1 then
+    invalid_arg "remove_wall: cells are not adjacent";
+
   let dir_to_neighbor, dir_to_cell =
-    if dx = 1 && dy = 0 then (East, West)
-    else if dx = -1 && dy = 0 then (West, East)
-    else if dx = 0 && dy = 1 then (South, North)
-    else if dx = 0 && dy = -1 then (North, South)
+    if dx = 1 && dy = 0 then (Cell.East, Cell.West)
+    else if dx = -1 && dy = 0 then (Cell.West, Cell.East)
+    else if dx = 0 && dy = 1 then (Cell.South, Cell.North)
+    else if dx = 0 && dy = -1 then (Cell.North, Cell.South)
     else
       invalid_arg "remove_wall: cells are not adjacent"
   in
+
   let update_walls walls target_dir =
-    List.map walls ~f:(fun (dir, exists) ->
+    List.map walls ~f:(fun (dir, exists) -> 
       if Poly.equal dir target_dir then (dir, false) else (dir, exists)
     )
   in
+
   let cell1' = { cell1 with walls = update_walls cell1.walls dir_to_neighbor } in
   let cell2' = { cell2 with walls = update_walls cell2.walls dir_to_cell } in
+
   let maze = set_cell maze cell1' in
   let maze = set_cell maze cell2' in
+
   maze
+
+
 
 (** [get_passable_neighbors maze cell] returns a list of neighboring cells that are accessible from [cell] (i.e., no wall between them). *)
 let get_passable_neighbors maze cell =
@@ -241,6 +268,5 @@ let initialize_cells maze =
   { maze with grid = new_grid }
 
   let test_find_wall walls direction = find_wall walls direction
-
 end
 

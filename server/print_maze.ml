@@ -2,11 +2,12 @@ open Core
 open Maze
 open Maze_generator
 open Maze_solver
+open Cell
 
 let () =
   (* Set the maze dimensions *)
-  let width = 3 in
-  let height = 3 in
+  let width = 10 in
+  let height = 10 in
 
   (* Choose a generator: "recursive", "prim", or "kruskal" *)
   let generator_name = "recursive" in
@@ -27,7 +28,6 @@ let () =
     (* Remove walls for entry and exit *)
     let start_cell = Maze.get_cell generated_maze 0 0 in
     let end_cell = Maze.get_cell generated_maze (width - 1) (height - 1) in
-    let open Cell in
     let start_cell = { start_cell with walls = List.map start_cell.walls ~f:(fun (dir, exists) ->
       if Poly.equal dir West then (dir, false) else (dir, exists)) } in
     
