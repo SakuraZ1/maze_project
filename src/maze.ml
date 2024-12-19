@@ -189,31 +189,11 @@ let get_neighbors maze cell =
       acc
   )
 
-
-
-(** [remove_wall maze cell1 cell2] returns a new maze with the wall between [cell1] and [cell2] removed. *)(* 打印单元格的墙壁状态 *)
-(*
-let string_of_direction dir =
-  match dir with
-  | Cell.North -> "North"
-  | Cell.South -> "South"
-  | Cell.East -> "East"
-  | Cell.West -> "West"
-let print_wall_status cell =
-  let directions = [Cell.North; Cell.South; Cell.East; Cell.West] in
-  Printf.printf "Wall status for cell (%d, %d) before removal:\n" cell.x cell.y;
-  List.iter directions ~f:(fun dir ->
-    (* 检查当前方向的墙是否存在 *)
-    let wall_exists = List.exists cell.walls ~f:(fun (d, exists) -> Poly.equal d dir && exists) in
-    Printf.printf "Direction %s: %b\n" 
-      (string_of_direction dir) wall_exists
-  )
-*)
+(** [remove_wall maze cell1 cell2] remove the wall between two cells *)
 let remove_wall maze cell1 cell2 =
   let dx = cell2.x - cell1.x in
   let dy = cell2.y - cell1.y in
 
-  (* 检查单元格是否相邻 *)
   if abs dx > 1 || abs dy > 1 then
     invalid_arg "remove_wall: cells are not adjacent";
 
