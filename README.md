@@ -33,13 +33,16 @@ After running above commands, the Command-line Interface (CLI) should be display
             - The error message should be displayed:
                 - "Invalid choice. Please select a valid algorithm."
             - Wait for users to input a correct algorithm
+    - Note: for Maze generated, the entrey is on the top-left corner and exit is one the bottom-right corner
 - Choose maze solving algorithm (BFS, AStar):
     - Choose the expected generator algorithm from "BFS" and "AStar"
         - Uppercase or lowercase are all fine
         - If the input is not matched with these three algorithms
             - The error message should be displayed:
                 - "Invalid choice. Please select a valid algorithm."
-            - Wait for users to input a correct algorithm 
+            - Wait for users to input a correct algorithm
+
+
           
 ### Sample Input:
 ```
