@@ -7,13 +7,6 @@
 
 
 (executable
- (name server)
- (modules server)
- (libraries dream core main maze_generator maze_solver maze utils lwt lwt.unix cell)
-  (preprocess (pps ppx_jane lwt_ppx))
-)
-
-(executable
   (name print_maze)
   (modules print_maze)
   (libraries cell core maze maze_generator maze_solver utils)

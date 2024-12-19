@@ -3,9 +3,9 @@
   (deps 
     src/cell.ml
     server/main.ml
+    server/print_maze.ml
     src/maze_generator.ml
     src/maze_solver.ml
-    server/server.ml
     src/utils.ml
     src/maze.ml
 
