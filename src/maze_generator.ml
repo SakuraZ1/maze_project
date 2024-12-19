@@ -61,7 +61,6 @@ module RecursiveBacktrackerGenerator : MAZE_GENERATOR = struct
     
     if path_exists maze (0, 0) (width - 1, height - 1) then
       begin
-        Maze.display maze; 
         maze
       end
     else
