@@ -58,6 +58,7 @@ val display_with_solution : maze -> (int * int) list -> unit
  (* Initializes cells in the maze, preparing them for use in generation or solving. *)
   val initialize_cells : maze -> maze
 
+(* Test funtion find_wall to see if it returns properly. *)
   val test_find_wall : (direction * bool) list -> direction -> bool
 
 end

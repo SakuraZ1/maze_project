@@ -5,59 +5,56 @@ open Maze_solver
 open Cell
 
 
-(* [display_with_solution maze solution] displays the maze with the solution path overlaid,
-    without modifying the original maze structure. *)
-    let display_with_solution maze solution =
-      let is_on_solution x y =
-        List.exists solution ~f:(fun (sx, sy) -> sx = x && sy = y)
-      in
-    
-      (* Generate horizontal walls *)
-      let horizontal_walls =
-        List.map (Maze.get_grid maze) ~f:(fun row ->
-          List.map row ~f:(fun cell ->
-            if List.Assoc.find_exn cell.walls North ~equal:Poly.equal then "+---"
-            else "+   "
-          )
-        )
-      in
-    
-      (* Generate vertical walls with solution path overlaid *)
-      let vertical_walls =
-        List.map (Maze.get_grid maze) ~f:(fun row ->
-          List.map row ~f:(fun cell ->
-            let cell_content =
-              if is_on_solution cell.x cell.y then " * " else "   "
-            in
-            if List.Assoc.find_exn cell.walls West ~equal:Poly.equal then "|" ^ cell_content
-            else " " ^ cell_content
-          )
-        )
-      in
-    
-      (* Build the top boundary *)
-      let top_boundary =
-        String.concat ~sep:"" (List.init (Maze.get_width maze) ~f:(fun _ -> "+---")) ^ "+\n"
-      in
-    
-      (* Combine horizontal and vertical walls row by row *)
-      let maze_string =
-        List.fold2_exn horizontal_walls vertical_walls ~init:top_boundary ~f:(fun acc horiz vert ->
-          let horizontal_line = String.concat ~sep:"" horiz ^ "+\n" in
-          let vertical_line = String.concat ~sep:"" vert ^ "|\n" in
-          acc ^ vertical_line ^ horizontal_line
-        )
-      in
-    
-      print_string maze_string
-    
+(* [display_with_solution] displays the maze and overlays the solution path.
+   It prints each cell of the maze along with visual indicators for the path.
 
+   - [maze] : The maze to display.
+   - [solution] : A list of (x, y) positions representing the solution path.
+*)
+
+let display_with_solution maze solution =
+  (* [is_on_solution x y] checks whether a given (x, y) cell is part of the solution path. *)
+        let is_on_solution x y =
+          List.exists solution ~f:(fun (sx, sy) -> sx = x && sy = y)
+        in
+      
+        let width = Maze.get_width maze in
+      
+         (* [top_boundary] creates the top boundary of the maze as "+---" repeated. *)
+        let top_boundary =
+          String.concat ~sep:"" (List.init width ~f:(fun _ -> "+---")) ^ "+\n"
+        in
+      
+        (* [maze_string] generates the entire maze with the solution overlay. *)
+        let maze_string =
+          List.foldi (Maze.get_grid maze) ~init:top_boundary ~f:(fun _ acc row ->
+
+            (* [horizontal_line] represents the horizontal boundaries for each row. *)
+            let horizontal_line =
+              String.concat ~sep:"" (List.map row ~f:(fun _ -> "+---")) ^ "+\n"
+            in
+
+            (* [vertical_line] represents the vertical boundaries and cell contents. *)
+            let vertical_line =
+              String.concat ~sep:"" (List.map row ~f:(fun cell ->
+                if is_on_solution cell.x cell.y then "| ■ " (* Solid square path *)
+                else "|   ")) ^ "|\n"
+            in
+
+            (* Append the vertical and horizontal lines to the accumulator string. *)
+            acc ^ vertical_line ^ horizontal_line
+          )
+        in
+        print_string maze_string
+      
 
 (* Helper function to normalize user input (ignore case and whitespace) *)
 let normalize_input input =
   String.strip input |> String.lowercase
 
-(* Function to read and validate positive integer inputs *)
+
+(* [read_positive_int prompt] safely reads a positive integer from the user.
+   It prompts until a valid integer in the range [3, 19] is provided. *)
 let read_positive_int prompt =
   Printf.printf "%s" prompt;
   Out_channel.flush stdout;
@@ -70,7 +67,11 @@ let read_positive_int prompt =
   | Failure _ -> failwith "Invalid input: Please enter a positive integer and be in > 2 and < 20, Or you will not see a nice Maze!"
   | exn -> raise exn
 
-(* Function to read and validate algorithm selection *)
+
+(* [read_algorithm prompt valid_algorithms] reads and validates a user's choice of algorithm.
+   - [prompt]: The prompt displayed to the user.
+   - [valid_algorithms]: A list of valid algorithm names to compare against.
+*)
 let read_algorithm prompt valid_algorithms =
   Printf.printf "%s" prompt;
   Out_channel.flush stdout;
@@ -88,6 +89,8 @@ let read_algorithm prompt valid_algorithms =
   in
   validate_input ()
 
+
+  
 let () =
   (* Safely read maze dimensions *)
   let width =
